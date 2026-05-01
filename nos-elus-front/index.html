@@ -4,20 +4,77 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nos-elus.com — Cherche un élu. Découvre le reste.</title>
-    <meta name="description" content="Plateforme citoyenne pour consulter les affaires judiciaires, votes et patrimoine des élus de la République." />
-    <meta property="og:title" content="nos-elus.com" />
-    <meta property="og:description" content="Cherche un élu. Découvre le reste. Affaires, votes, patrimoine — tout est sourcé." />
+    <meta name="theme-color" content="#0a0e1a" />
+
+    <title>nos-elus.com — Affaires, votes, patrimoine de tous les élus de France | Nos élus</title>
+
+    <meta name="description" content="nos-elus.com — agrégateur citoyen et open source de données publiques sur les ~50 000 élus de la République française. Affaires judiciaires, votes parlementaires, patrimoine HATVP, cumul des mandats, indemnités. Tout est sourcé, rien n'est inventé. Consultez nos élus : députés, sénateurs, maires, ministres, eurodéputés." />
+
+    <meta name="keywords" content="nos élus, nos-elus, noselus, nos-elus.com, nosélus, nos elus, transparence politique, élus France, député, sénateur, maire, ministre, eurodéputé, patrimoine élus, HATVP, cumul mandats, casier judiciaire élu, affaires politiques, votes parlementaires, présidentielle 2027, conseil constitutionnel, palmarès élus" />
+
+    <meta name="author" content="Projet Nos Élus" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="language" content="fr-FR" />
+
+    <link rel="canonical" href="https://nos-elus.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="nos-elus.com — Affaires, votes, patrimoine des élus" />
+    <meta property="og:description" content="Cherche un élu. Découvre le reste. Tous les élus de France : affaires, votes, patrimoine — données publiques sourcées." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://nos-elus.com" />
+    <meta property="og:url" content="https://nos-elus.com/" />
     <meta property="og:image" content="https://nos-elus.com/logo-nos-elus.svg" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="nos-elus.com" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Nos Élus" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="nos-elus.com — Tous les élus de France" />
     <meta name="twitter:description" content="Cherche un élu. Découvre le reste. Affaires, votes, patrimoine — tout est sourcé." />
     <meta name="twitter:image" content="https://nos-elus.com/logo-nos-elus.svg" />
+
+    <!-- Données structurées schema.org -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Nos Élus",
+      "alternateName": ["nos-elus", "noselus", "nos élus", "nos-elus.com"],
+      "url": "https://nos-elus.com/",
+      "description": "Plateforme citoyenne open source d'agrégation de données publiques sur les élus de la République française.",
+      "inLanguage": "fr-FR",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://nos-elus.com/elu/{search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Projet Nos Élus",
+      "alternateName": "Nos Élus",
+      "url": "https://nos-elus.com/",
+      "logo": "https://nos-elus.com/logo-nos-elus.svg",
+      "sameAs": ["https://github.com/Nos-elus/Nos-elus.com"]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>nos-elus.com — Tous les élus de France</h1>
+      <p>nos-elus.com (aussi appelé nos-elus, noselus ou nos élus) est une plateforme citoyenne et open source qui agrège des données publiques sur les ~50 000 élus de la République française : députés, sénateurs, maires, ministres, eurodéputés, conseillers régionaux et départementaux, membres du Conseil constitutionnel.</p>
+      <p>Pour chaque élu, vous pouvez consulter : affaires judiciaires (mis en examen, condamné, relaxé, classé), votes parlementaires, patrimoine déclaré à la HATVP, cumul des mandats, indemnités touchées, coût total de la carrière politique. Tous les éléments sont sourcés depuis des sources publiques officielles.</p>
+      <p>Sources : Répertoire National des Élus (data.gouv.fr), data.assemblee-nationale.fr, data.senat.fr, NosDéputés.fr, HATVP, JUDILIBRE, Wikidata, Parlement européen.</p>
+      <p>Activez JavaScript pour utiliser le site interactivement, ou consultez le <a href="https://github.com/Nos-elus/Nos-elus.com">code source sur GitHub</a>.</p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

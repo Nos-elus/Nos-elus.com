@@ -38,6 +38,20 @@ nos-elus-deploy.zip
 *.zip
 docs/local-*
 
+# Sécurité / anti-bot / anti-spam — JAMAIS publier
+api/contact.php
+api/cron-process-inbox.php
+api/cron-backup-votes.php
+api/webhook-mail.php
+api/regen-photos-vips.php
+api/regen-photos-broken.php
+api/cron-regen-photos.php
+api/scrape-cc-photos.php
+api/match-photos-importees.php
+api/indexnow-notify.php
+api/admin-candidat.php
+nos-elus-front/src/pages/Contact.jsx
+
 # Backups et fichiers temporaires
 *.bak
 *.backup
@@ -63,3 +77,6 @@ npm-debug.log*
 .htaccess
 scripts/output/
 tipee-content.md
+photos-traitees/
+Document 1 non enregistré
+*Document*non*enregistré*

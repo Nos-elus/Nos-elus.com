@@ -357,6 +357,14 @@ const MatchMaker = () => {
         {/* Colonne filtres */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14, position: "sticky", top: 70, maxHeight: "calc(100vh - 90px)", overflowY: "auto", paddingRight: 4 }} className="matchmaker-filters">
 
+          {/* Poste — remonté en premier filtre */}
+          <FilterCard icon="🏛️" title="Type de poste" humor={humors.poste} active={!!poste}>
+            <StyledSelect value={poste} onChange={setPoste} options={[
+              "Député", "Sénateur", "Maire", "Ministre", "Européen",
+              "Conseiller régional", "Conseiller départemental",
+            ]} placeholder="Tous les postes" />
+          </FilterCard>
+
           {/* Age */}
           <FilterCard icon="🎂" title="Âge" humor={humors.age} active={ageMin > 18 || ageMax < 95}>
             <RangeSlider min={18} max={95} valueMin={ageMin} valueMax={ageMax}
@@ -401,14 +409,6 @@ const MatchMaker = () => {
                 onChange={e => setCasserolesMax(+e.target.value)}
                 style={{ width: "100%", accentColor: casserolesMax <= 2 ? S.green : casserolesMax <= 5 ? S.gold : S.red, height: 6 }} />
             </div>
-          </FilterCard>
-
-          {/* Poste */}
-          <FilterCard icon="🏛️" title="Type de poste" humor={humors.poste} active={!!poste}>
-            <StyledSelect value={poste} onChange={setPoste} options={[
-              "Député", "Sénateur", "Maire", "Ministre", "Européen",
-              "Conseiller régional", "Conseiller départemental",
-            ]} placeholder="Tous les postes" />
           </FilterCard>
 
           {/* Salaire */}

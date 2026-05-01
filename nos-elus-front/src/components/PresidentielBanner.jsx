@@ -150,7 +150,9 @@ const PresidentielBanner = () => {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
   const [hovered2027, setHovered2027] = useState(null);
-  const [paused, setPaused] = useState(false);
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
+  const paused = hoverPaused || userPaused;
   const [candidats2027, setCandidats2027] = useState([]);
 
   useEffect(() => {
@@ -187,8 +189,8 @@ const PresidentielBanner = () => {
   return (
     <div
       className="banner-slide"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => setHoverPaused(true)}
+      onMouseLeave={() => setHoverPaused(false)}
       style={{
         textAlign: "center", marginBottom: 48, padding: "32px 16px 24px",
         background: "radial-gradient(ellipse at 50% 0%, rgba(253,203,110,0.10) 0%, rgba(108,92,231,0.05) 40%, transparent 70%)",
@@ -196,6 +198,25 @@ const PresidentielBanner = () => {
         position: "relative", overflow: "hidden", minHeight: 280,
       }}
     >
+      {/* Bouton pause/play en haut à droite */}
+      <button
+        onClick={() => setUserPaused(p => !p)}
+        aria-label={userPaused ? "Reprendre le défilement" : "Mettre en pause"}
+        title={userPaused ? "Reprendre" : "Pause"}
+        style={{
+          position: "absolute", top: 12, right: 12, zIndex: 5,
+          width: 32, height: 32, borderRadius: "50%",
+          background: userPaused ? S.gold : "rgba(255,255,255,0.08)",
+          border: `1px solid ${userPaused ? S.gold : "rgba(255,255,255,0.15)"}`,
+          color: userPaused ? S.bg : S.gold,
+          cursor: "pointer", fontSize: 12, lineHeight: 1, fontWeight: 900,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all 0.2s",
+        }}
+      >
+        {userPaused ? "▶" : "❚❚"}
+      </button>
+
       {/* Navigation dots + labels */}
       <div className="banner-slides-nav" style={{
         display: "flex", justifyContent: "center", gap: 6, marginBottom: 20,

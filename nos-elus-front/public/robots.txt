@@ -1,7 +1,21 @@
 User-agent: *
 Allow: /
 
+# Bloquer endpoints internes
 Disallow: /api/cache/
+Disallow: /api/admin/
 Disallow: /api/fetcher/
+Disallow: /api/migrations/
 
-Sitemap: https://nos-elus.fr/sitemap.xml
+# Autoriser les bots sociaux à voir les meta dynamiques
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# Sitemap
+Sitemap: https://nos-elus.com/api/sitemap.php

@@ -4,7 +4,7 @@ import Card from "../components/Card";
 const About = () => (
   <div style={{ maxWidth: 680, margin: "0 auto", paddingTop: 40, animation: "slideUp 0.5s cubic-bezier(0.16,1,0.3,1)" }}>
     <h2 style={{ fontFamily: S.fontTitle, fontSize: 28, color: S.gold, textAlign: "center", marginBottom: 32 }}>
-      À propos <span style={{ fontSize: 24 }}>🇫🇷</span>
+      À propos
     </h2>
 
     <Card>

@@ -32,6 +32,7 @@ const Navbar = () => {
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [menuOpen, setMenuOpen] = useState(false);
   const searchRef = useRef(null);
+  const searchRefMobile = useRef(null);
   const drawerRef = useRef(null);
   const [soutenirMsg] = useState(() => SOUTENIR_MESSAGES[Math.floor(Math.random() * SOUTENIR_MESSAGES.length)]);
 
@@ -59,7 +60,9 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) setShowResults(false);
+      const inDesktop = searchRef.current && searchRef.current.contains(e.target);
+      const inMobile = searchRefMobile.current && searchRefMobile.current.contains(e.target);
+      if (!inDesktop && !inMobile) setShowResults(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -100,7 +103,7 @@ const Navbar = () => {
       {searchLoading ? (
         <div style={{ padding: 16, fontSize: 12, color: S.textDim, textAlign: "center" }}>Recherche...</div>
       ) : results.length === 0 ? (
-        <div style={{ padding: 16, fontSize: 12, color: S.textDim, textAlign: "center" }}>Aucun resultat pour "{query}"</div>
+        <div style={{ padding: 16, fontSize: 12, color: S.textDim, textAlign: "center" }}>Aucun résultat pour "{query}"</div>
       ) : results.map((elu, i) => (
         <div key={elu.id} onClick={() => handleSelect(elu)} onMouseEnter={() => { setFocusedIndex(i); prefetchElu(elu.slug || slugify(elu.nom)); }}
           style={{
@@ -112,8 +115,8 @@ const Navbar = () => {
           }}>
           <Avatar elu={elu} size={28} showBorder={false} />
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{elu.nom}</div>
-            {elu.parti && <div style={{ fontSize: 10, color: S.textDim }}>{elu.parti}</div>}
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{elu.prenom ? `${elu.prenom} ${elu.nom}` : elu.nom}</div>
+            <div style={{ fontSize: 10, color: S.textDim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 280 }}>{elu.fonction || elu.parti || ''}</div>
           </div>
         </div>
       ))}
@@ -127,7 +130,7 @@ const Navbar = () => {
         borderBottom: "1px solid rgba(255,255,255,0.04)",
         position: "sticky", top: 0, zIndex: 100,
         background: "rgba(10,14,26,0.96)", backdropFilter: "blur(14px)",
-        width: "100%", overflow: "hidden",
+        width: "100%",
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -141,7 +144,7 @@ const Navbar = () => {
               fontFamily: S.font, fontSize: 11, color: S.textDim, fontWeight: 600,
               fontStyle: "italic", whiteSpace: "nowrap", marginLeft: 8,
             }}>
-              Tout est public, on a juste rendu ca simple.
+              Tout est public, on a juste rendu ça simple.
             </span>
           )}
         </div>
@@ -152,7 +155,7 @@ const Navbar = () => {
             <Dice3D onClick={() => { window.location.href = "/api/random.php?redirect=1"; }} />
             <div ref={searchRef} style={{ position: "relative", flex: 1 }}>
               <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown}
-                placeholder="Rechercher un elu..."
+                placeholder="Rechercher un élu..."
                 autoComplete="off"
                 style={{
                   width: "100%", padding: "8px 12px 8px 34px", fontSize: 13, fontWeight: 600,
@@ -178,7 +181,7 @@ const Navbar = () => {
             fontFamily: S.font, fontSize: 18, color: "#fff", fontWeight: 700,
             fontStyle: "italic", whiteSpace: "nowrap", pointerEvents: "none",
           }}>
-            Tout est public, on a juste rendu ca simple.
+            Tout est public, on a juste rendu ça simple.
           </span>
         )}
 
@@ -276,10 +279,10 @@ const Navbar = () => {
         <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <Dice3D onClick={() => { setMenuOpen(false); window.location.href = "/api/random.php?redirect=1"; }} />
-            <div ref={searchRef} style={{ position: "relative", flex: 1 }}>
+            <div ref={searchRefMobile} style={{ position: "relative", flex: 1 }}>
               <input
                 type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown}
-                placeholder="Rechercher un elu..."
+                placeholder="Rechercher un élu..."
                 autoComplete="off"
                 style={{
                   width: "100%", padding: "10px 12px 10px 36px", fontSize: 13, fontWeight: 600,
@@ -324,7 +327,7 @@ const Navbar = () => {
           fontSize: 11, color: S.textDim, fontStyle: "italic", textAlign: "center",
           fontFamily: S.font,
         }}>
-          Tout est public, on a juste rendu ca simple.
+          Tout est public, on a juste rendu ça simple.
         </div>
       </div>
     </>

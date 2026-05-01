@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { S } from "../utils/constants";
 import Avatar from "../components/Avatar";
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
 const Presidentielle2027 = () => {
+  const navigate = useNavigate();
   const [candidats, setCandidats] = useState([]);
   const [ranking, setRanking] = useState([]);
   const [results, setResults] = useState([]);
@@ -14,6 +16,18 @@ const Presidentielle2027 = () => {
   const [sending, setSending] = useState(false);
   const [totalVotes, setTotalVotes] = useState(0);
   const [showVutInfo, setShowVutInfo] = useState(false);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+
+  const reorderRanking = (fromIdx, toIdx) => {
+    if (fromIdx === toIdx || fromIdx == null || toIdx == null) return;
+    setRanking(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, moved);
+      return next;
+    });
+  };
 
   const fetchResults = useCallback(async () => {
     try {
@@ -165,28 +179,28 @@ const Presidentielle2027 = () => {
             textAlign: "left", maxWidth: 600, margin: "16px auto 0",
           }}>
             <div style={{ fontFamily: S.fontTitle, fontSize: 15, color: S.gold, marginBottom: 12 }}>
-              Pourquoi le Vote Unique Transferable ?
+              Pourquoi le Vote Unique Transférable ?
             </div>
             <div style={{ fontFamily: S.font, fontSize: 13, color: "#ddd", lineHeight: 1.8 }}>
               <p style={{ margin: "0 0 10px" }}>
-                Le scrutin uninominal a deux tours utilise en France oblige souvent les electeurs a voter
-                "contre" plutot que "pour". Le <strong style={{ color: S.gold }}>Vote Unique Transferable (VUT)</strong> resout
-                ce probleme : vous classez tous les candidats par ordre de preference.
+                Le scrutin uninominal à deux tours utilisé en France oblige souvent les électeurs à voter
+                "contre" plutôt que "pour". Le <strong style={{ color: S.gold }}>Vote Unique Transférable (VUT)</strong> résout
+                ce problème : vous classez tous les candidats par ordre de préférence.
               </p>
               <p style={{ margin: "0 0 10px" }}>
-                <strong style={{ color: S.green }}>Comment ca marche ici :</strong> votre 1er choix recoit N points,
-                le 2e N-1 points, etc. (N = nombre total de candidats). Le classement final reflette la <strong>preference reelle</strong> des
+                <strong style={{ color: S.green }}>Comment ça marche ici :</strong> votre 1er choix reçoit N points,
+                le 2e N-1 points, etc. (N = nombre total de candidats). Le classement final reflète la <strong>préférence réelle</strong> des
                 participants, pas un choix binaire.
               </p>
               <p style={{ margin: "0 0 10px" }}>
                 <strong style={{ color: S.purple }}>Pourquoi c'est mieux :</strong> plus de "vote utile" ni de
-                dilemme strategique. Chaque voix compte integralement. Les candidats de consensus sont
-                naturellement valorises, pas seulement les plus polarisants.
+                dilemme stratégique. Chaque voix compte intégralement. Les candidats de consensus sont
+                naturellement valorisés, pas seulement les plus polarisants.
               </p>
               <p style={{ margin: "0 0 10px", fontStyle: "italic", color: "#bbb" }}>
-                Ce n'est pas un vote officiel — c'est une estimation citoyenne de la volonte populaire,
-                basee sur un mode de scrutin que de nombreux specialistes de la democratie considerent
-                comme plus representatif.
+                Ce n'est pas un vote officiel — c'est une estimation citoyenne de la volonté populaire,
+                basée sur un mode de scrutin que de nombreux spécialistes de la démocratie considèrent
+                comme plus représentatif.
               </p>
             </div>
             <div style={{
@@ -194,12 +208,12 @@ const Presidentielle2027 = () => {
               background: "rgba(255,255,255,0.05)", border: `1px solid ${S.gold}22`,
             }}>
               <div style={{ fontFamily: S.font, fontSize: 12, color: "#ccc", fontStyle: "italic", lineHeight: 1.6 }}>
-                "Le vote unique transferable est le systeme qui donne le resultat le plus fidele
-                a la volonte des electeurs, car il elimine le vote strategique et permet a chacun
-                d'exprimer ses preferences reelles sans crainte de gaspiller sa voix."
+                "Le vote unique transférable est le système qui donne le résultat le plus fidèle
+                à la volonté des électeurs, car il élimine le vote stratégique et permet à chacun
+                d'exprimer ses préférences réelles sans crainte de gaspiller sa voix."
               </div>
               <div style={{ fontFamily: S.font, fontSize: 11, color: S.gold, marginTop: 6 }}>
-                — Herve Moulin, economiste et specialiste de la theorie du choix social
+                — Hervé Moulin, économiste et spécialiste de la théorie du choix social
               </div>
               <a href="https://aceproject.org/ace-fr/topics/es/esd/esd02/esd02d/default"
                 target="_blank" rel="noreferrer" style={{
@@ -233,10 +247,13 @@ const Presidentielle2027 = () => {
               const sz = podiumSizes[visualIdx];
               const isFirst = podiumIdx === 0;
               return (
-                <div key={c.id} style={{
+                <div key={c.id}
+                  onClick={() => candidat.slug && navigate(`/elu/${candidat.slug}`)}
+                  style={{
                   display: "flex", flexDirection: "column", alignItems: "center",
                   animation: `f1SlideUp 0.6s ${0.1 + visualIdx * 0.15}s cubic-bezier(0.22,1,0.36,1) both`,
                   flex: isFirst ? "1.3" : "1", maxWidth: isFirst ? 180 : 150,
+                  cursor: candidat.slug ? "pointer" : "default",
                 }}>
                   <div style={{
                     fontFamily: S.fontTitle, fontSize: isFirst ? 22 : 16,
@@ -343,7 +360,9 @@ const Presidentielle2027 = () => {
             const pct = maxScore > 0 ? (c.score / maxScore) * 100 : 0;
             const isTop3 = i < 3;
             return (
-              <div key={c.id} style={{
+              <div key={c.id}
+                onClick={() => candidat.slug && navigate(`/elu/${candidat.slug}`)}
+                style={{
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "10px 14px", marginBottom: 6,
                 borderRadius: 14, position: "relative", overflow: "hidden",
@@ -353,6 +372,7 @@ const Presidentielle2027 = () => {
                 borderLeft: `4px solid ${candidat.couleur}`,
                 transition: "all 0.3s",
                 animation: `f1SlideIn 0.4s ${i * 0.05}s ease both`,
+                cursor: candidat.slug ? "pointer" : "default",
               }}>
                 <div style={{
                   position: "absolute", bottom: 0, left: 0, height: 2,
@@ -441,16 +461,37 @@ const Presidentielle2027 = () => {
               {ranking.map((id, i) => {
                 const c = candidats.find(x => x.id === id);
                 if (!c) return null;
+                const isDragging = dragIndex === i;
+                const isDragOver = dragOverIndex === i && dragIndex !== i;
                 return (
-                  <div key={c.id} onClick={() => toggleCandidat(c.id)} style={{
+                  <div key={c.id}
+                    draggable={!voted}
+                    onDragStart={() => setDragIndex(i)}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
+                    onDragLeave={() => setDragOverIndex(null)}
+                    onDrop={(e) => { e.preventDefault(); reorderRanking(dragIndex, i); setDragIndex(null); setDragOverIndex(null); }}
+                    onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                    style={{
                     display: "flex", alignItems: "center", gap: 12,
                     padding: "8px 14px", marginBottom: 4, borderRadius: 12,
-                    background: `linear-gradient(90deg, ${c.couleur}22, transparent)`,
-                    borderLeft: `3px solid ${c.couleur}`,
-                    cursor: voted ? "default" : "pointer",
+                    background: isDragOver
+                      ? `linear-gradient(90deg, ${S.gold}33, ${c.couleur}22)`
+                      : `linear-gradient(90deg, ${c.couleur}22, transparent)`,
+                    borderLeft: `3px solid ${isDragOver ? S.gold : c.couleur}`,
+                    boxShadow: isDragOver ? `0 0 12px ${S.gold}55` : "none",
+                    cursor: voted ? "default" : "grab",
                     animation: `f1SlideIn 0.3s ease`,
-                    opacity: voted ? 0.6 : 1,
+                    opacity: voted ? 0.6 : (isDragging ? 0.4 : 1),
+                    transition: "all 0.15s",
+                    userSelect: "none",
                   }}>
+                    {/* Drag handle */}
+                    {!voted && (
+                      <div style={{
+                        color: S.textDim, fontSize: 14, lineHeight: 1, fontWeight: 900,
+                        flexShrink: 0, opacity: 0.6, letterSpacing: -2,
+                      }} title="Glisser pour réordonner">⋮⋮</div>
+                    )}
                     <div style={{
                       width: 30, height: 30, borderRadius: "50%",
                       background: `linear-gradient(135deg, ${S.gold}, #e17a2d)`,
@@ -466,6 +507,18 @@ const Presidentielle2027 = () => {
                       fontFamily: S.font, fontSize: 10, color: "#fff", fontWeight: 700,
                       background: `${c.couleur}88`, borderRadius: 10, padding: "2px 8px",
                     }}>{c.parti}</span>
+                    {/* Bouton retirer explicite */}
+                    {!voted && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleCandidat(c.id); }}
+                        title="Retirer du classement"
+                        style={{
+                          background: "transparent", border: "none", cursor: "pointer",
+                          color: S.textDim, fontSize: 14, padding: "4px 6px",
+                          opacity: 0.6, lineHeight: 1,
+                        }}
+                      >✕</button>
+                    )}
                   </div>
                 );
               })}

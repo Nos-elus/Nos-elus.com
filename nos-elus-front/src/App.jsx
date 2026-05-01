@@ -1,5 +1,5 @@
-import { lazy, Suspense, useMemo } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useMemo, useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { S } from "./utils/constants";
 import "./styles/global.css";
 import Navbar from "./components/Navbar";
@@ -25,9 +25,35 @@ const NousAider = lazy(() => import("./pages/NousAider"));
 
 // Scroll to top on route change
 function ScrollToTop() {
-  const { pathname } = window.location;
-  if (typeof window !== "undefined") window.scrollTo(0, 0);
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [pathname]);
   return null;
+}
+
+// Bouton retour en haut (apparaît après 400px de scroll)
+function BackToTop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Retour en haut"
+      style={{
+        position: "fixed", bottom: 24, right: 24, zIndex: 90,
+        width: 48, height: 48, borderRadius: "50%",
+        background: S.gold, color: "#0f0f1a",
+        border: "none", cursor: "pointer", fontSize: 22, fontWeight: 900,
+        boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        animation: "fadeIn 0.2s ease",
+      }}
+    >↑</button>
+  );
 }
 
 // Background dots (mémorisé pour éviter le re-render)
@@ -78,6 +104,7 @@ function PageLoader() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div style={{ minHeight: "100vh", background: `linear-gradient(160deg, ${S.bg} 0%, #0d1525 40%, #141b2d 70%, #0a0e1a 100%)`, fontFamily: S.font, color: S.textMain }}>
         <Dots />
         <Navbar />
@@ -106,6 +133,7 @@ export default function App() {
         </main>
 
         <Footer />
+        <BackToTop />
       </div>
     </BrowserRouter>
   );
