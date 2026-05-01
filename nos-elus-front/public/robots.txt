@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/cache/
+Disallow: /api/fetcher/
+
+Sitemap: https://nos-elus.fr/sitemap.xml

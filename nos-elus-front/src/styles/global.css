@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body { overflow-x: hidden; }
+@media (min-width: 769px) { body { zoom: 1.2; } }
+::selection { background: #fdcb6e; color: #0f0f1a; }
+
+/* ── Animations ── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+@keyframes slotSpin { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+@keyframes stagger1 { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes pageEnter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse2027 { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+@keyframes pulseBtn { 0%, 100% { box-shadow: 0 0 0 0 rgba(253,203,110,0.4); } 50% { box-shadow: 0 0 12px 4px rgba(253,203,110,0.15); } }
+@keyframes searchSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes searchPulse { 0%, 100% { border-color: rgba(253,203,110,0.27); box-shadow: 0 0 10px rgba(253,203,110,0.07); } 50% { border-color: #fdcb6e; box-shadow: 0 0 24px rgba(253,203,110,0.2); } }
+@keyframes fadeInDown { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ── Dice 3D ── */
+.dice-scene { perspective: 120px; cursor: pointer; flex-shrink: 0; }
+.dice-cube {
+  width: 100%; height: 100%; position: relative;
+  transform-style: preserve-3d;
+}
+.dice-face {
+  position: absolute; inset: 0;
+  border: 1px solid rgba(253,203,110,0.35);
+  background: #1a1a2e;
+}
+.dice-dot {
+  width: 15%; height: 15%; border-radius: 50%;
+  background: #fdcb6e; box-shadow: 0 0 2px rgba(253,203,110,0.5);
+}
+.dice-front  { transform: translateZ(var(--dh)); }
+.dice-back   { transform: rotateY(180deg) translateZ(var(--dh)); }
+.dice-right  { transform: rotateY(90deg) translateZ(var(--dh)); }
+.dice-left   { transform: rotateY(-90deg) translateZ(var(--dh)); }
+.dice-top    { transform: rotateX(90deg) translateZ(var(--dh)); }
+.dice-bottom { transform: rotateX(-90deg) translateZ(var(--dh)); }
+.dice-scene:hover .dice-cube:not(.rolling) { filter: brightness(1.3); }
+
+/* ── Base ── */
+input::placeholder { color: #576574; }
+select { appearance: none; }
+select option { background: #1a1a2e; color: #eee; }
+
+/* ── Focus visible (accessibilité clavier) ── */
+*:focus-visible {
+  outline: 2px solid #fdcb6e;
+  outline-offset: 2px;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid #fdcb6e;
+  outline-offset: 2px;
+}
+
+/* ── Touch targets minimum 44px (mobile) ── */
+@media (pointer: coarse) {
+  button, a, select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ── Scrollbar custom ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a42; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a52; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  body { font-size: 14px; }
+  .nav-label { display: none !important; }
+  .nav-slogan { display: none !important; }
+  .nav-desktop-search { display: none !important; }
+  .nav-desktop-links { display: none !important; }
+  .nav-hamburger { display: flex !important; }
+  .nav-search { flex: 1 1 auto !important; margin: 0 6px !important; min-width: 0 !important; }
+  .nav-soutenir { padding: 5px 8px !important; font-size: 10px !important; }
+  .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .quick-tags { flex-wrap: nowrap !important; overflow-x: auto !important; justify-content: flex-start !important; padding-bottom: 8px !important; padding-left: 4px !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; width: 100%; }
+  .quick-tags::-webkit-scrollbar { display: none; }
+  .elu-header { flex-direction: column !important; }
+  .elu-palmares { width: 100% !important; min-width: unset !important; }
+  .elu-boussole { width: 100% !important; min-width: unset !important; }
+  .elu-ministats { grid-template-columns: repeat(2, 1fr) !important; }
+  .elu-tabs { overflow-x: auto !important; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px !important; }
+  .elu-tabs::-webkit-scrollbar { display: none; }
+  .banner-slides-nav { flex-wrap: wrap !important; gap: 4px !important; }
+  .banner-slides-nav button { font-size: 11px !important; padding: 4px 10px !important; }
+  .banner-candidats { gap: 4px !important; }
+  .banner-candidats > div > div:first-child { width: 48px !important; height: 48px !important; }
+  .banner-slide { padding: 20px 10px 16px !important; }
+  .podium-row { flex-direction: column !important; align-items: center !important; gap: 20px !important; }
+  .podium-row > div { max-width: 200px !important; }
+  .vote-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 480px) {
+  body { font-size: 13px; }
+  main { padding: 0 16px !important; }
+  nav { padding: 12px 16px !important; }
+  h1 { font-size: clamp(22px, 6vw, 36px) !important; }
+}
+
+/* ── Transition entre pages ── */
+main > div {
+  animation: pageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Prevent layout shift on scrollbar ── */
+html { overflow-y: scroll; }

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <defs>
+    <style>
+      .logo-text { font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; fill: #fdcb6e; }
+    </style>
+  </defs>
+  <!-- Urne de vote -->
+  <rect x="70" y="8" width="36" height="28" rx="3" fill="none" stroke="#fdcb6e" stroke-width="2.5"/>
+  <rect x="74" y="4" width="28" height="4" rx="1.5" fill="#fdcb6e"/>
+  <rect x="83" y="13" width="10" height="3" rx="1" fill="#fdcb6e"/>
+  <!-- Bulletin entrant -->
+  <rect x="85" y="1" width="6" height="8" rx="0.5" fill="#fdcb6e" opacity="0.7" transform="rotate(-10 88 5)"/>
+  <!-- Loupe par-dessus l'urne -->
+  <circle cx="108" cy="18" r="10" fill="none" stroke="#fdcb6e" stroke-width="2.5"/>
+  <line x1="115" y1="25" x2="123" y2="33" stroke="#fdcb6e" stroke-width="3" stroke-linecap="round"/>
+  <!-- Texte -->
+  <text x="100" y="58" text-anchor="middle" class="logo-text" font-size="16">nos-elus.fr</text>
+  <!-- Ligne décorative -->
+  <line x1="55" y1="63" x2="145" y2="63" stroke="#fdcb6e" stroke-width="0.8" opacity="0.4"/>
+</svg>

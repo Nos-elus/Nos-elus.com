@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+nos-elus-front/node_modules/
+
+# Build
+nos-elus-front/dist/
+dist/
+
+# Environment & credentials — NE JAMAIS COMMITTER
+.env
+.env.local
+.env.production
+api/config.php
+api/config.local.php
+
+# Cache serveur — données sensibles et volumineuses
+api/cache/data/
+api/.user.ini
+api/cache/
+
+# Données candidats 2027 (gérées séparément sur le serveur)
+api/candidats_2027.json
+
+# Documents et notes internes — confidentialité du contributeur
+claude.md
+.claude/
+nos-elus-plan-projet.docx
+echange/
+deploy/
+photos/
+api/admin/
+
+# Imports manuels et assets non publics
+photos-importees/
+tepee/
+mp
+nos-elus-deploy.zip
+*.zip
+docs/local-*
+
+# Backups et fichiers temporaires
+*.bak
+*.backup
+*_backup.*
+*_local.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files
+.~lock.*
+
+# Logs
+*.log
+npm-debug.log*
+.htaccess
+scripts/output/
+tipee-content.md
