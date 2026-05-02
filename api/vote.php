@@ -187,25 +187,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Cookie anti-revote par élu (expire dans 2 ans)
-    if ($result['status'] === 'removed') {
-        // Supprimer le cookie si vote retiré
-        setcookie('noselus_vc_' . $eluId, '', [
-            'expires' => time() - 3600,
-            'path' => '/',
-            'secure' => true,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-    } else {
-        setcookie('noselus_vc_' . $eluId, (string)$vote, [
-            'expires' => time() + 63072000,
-            'path' => '/',
-            'secure' => true,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-    }
+    // Pas de cookie : l'anti-revote est assuré par le hash IP côté serveur,
+    // la synchro UI par localStorage côté navigateur. Aucun cookie déposé.
 
     echo json_encode($result);
     exit;

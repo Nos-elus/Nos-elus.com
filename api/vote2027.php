@@ -80,9 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if (isset($_GET['check'])) {
             $hasVoted  = isset($data['votes'][$hash]);
             $classement = $hasVoted ? $data['votes'][$hash] : null;
-            if (!$hasVoted && isset($_COOKIE['noselus_v27'])) {
-                setcookie('noselus_v27', '', ['expires' => time() - 3600, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
-            }
             jsonResponse(['voted' => $hasVoted, 'classement' => $classement]);
         }
 
@@ -184,14 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         jsonResponse(['error' => 'Erreur lors de la sauvegarde du vote.'], 500);
     }
 
-    setcookie('noselus_v27', '1', [
-        'expires'  => time() + 63072000,
-        'path'     => '/',
-        'secure'   => true,
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
-
+    // Pas de cookie : anti-revote via hash IP côté serveur, synchro UI via localStorage.
     jsonResponse(
         ['success' => true, 'message' => $isChange ? 'Vote modifie.' : 'Vote enregistre.'],
         $isChange ? 200 : 201
@@ -214,14 +204,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     if ($result === null) {
         jsonResponse(['error' => 'Erreur lors de la suppression.'], 500);
     }
-
-    setcookie('noselus_v27', '', [
-        'expires'  => time() - 3600,
-        'path'     => '/',
-        'secure'   => true,
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
 
     jsonResponse(['success' => true, 'message' => 'Vote retire.']);
 }
