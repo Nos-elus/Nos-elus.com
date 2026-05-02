@@ -98,6 +98,27 @@ Quatre indicateurs sur 5 :
 
 Tous les coefficients sont en clair dans `api/calcul-cout.php` et `api/palmares.php`.
 
+### Vote citoyen (👍 / 👎)
+
+Chaque visiteur peut voter pour ou contre un élu. Code complet : `api/vote.php` + `nos-elus-front/src/components/VoteCitoyen.jsx`.
+
+**Règles** :
+- **1 vote par fiche par visiteur** — vote remplaçable (changer d'avis ou retirer)
+- **Aucun compte, aucune inscription, aucun cookie** — la fiche est notée par n'importe qui sans authentification
+- Identité du votant = `SHA256(IP + sel)` — l'IP brute n'est **jamais** stockée, seulement le hash. Le sel applicatif rend les hashs incomparables d'un déploiement à l'autre
+- **Synchronisation côté navigateur** via `localStorage` (clé `noselus_votes`) pour afficher l'état du vote sans rappel serveur, sans cookie
+
+**Anti-spam / anti-bot** :
+- Rate limit : **10 votes / minute** par hash IP
+- Origin CORS strictement restreint au domaine officiel
+- Pas de tracking secondaire (pas d'analytics, pas de fingerprint navigateur)
+
+**Stockage** :
+- Backend = fichier JSON `cache/data/votes_citoyens.json` avec `flock()` pour les écritures concurrentes (pas une table relationnelle, volontairement simple et auditable)
+- Format : `{ "<hashIP>_<elu_id>": { "elu_id": N, "vote": 1|-1, "ts": ... } }`
+
+**Pondération dans les classements** : aucune. Les votes citoyens sont **purement informatifs** sur la fiche de l'élu. Ils n'influencent pas les classements automatiques (top_assidus, top_cout, top_casseroles, etc.) qui restent calculés exclusivement à partir des sources officielles.
+
 ---
 
 ## Structure
