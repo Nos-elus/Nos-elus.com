@@ -119,9 +119,11 @@ function parseResult(array $r): array {
         $adresse = implode(', ', $parts) ?: null;
     }
 
+    // Politique éditoriale nos-elus : priorité service-public.gouv.fr (annuaire officiel),
+    // fallback site mairie. Wikipedia interdit pour les maires (cron-enrich-ministers.php
+    // est le seul autorisé à fallback wikipedia, et uniquement en dernier recours).
     $urlFiche = $r['url_service_public'] ?? null;
-    // Préférer le site de la mairie si disponible
-    if ($site) $urlFiche = $site;
+    if (!$urlFiche && $site) $urlFiche = $site;
 
     return compact('email', 'tel', 'site', 'adresse', 'urlFiche');
 }

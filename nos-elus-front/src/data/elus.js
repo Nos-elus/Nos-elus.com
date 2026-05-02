@@ -192,7 +192,7 @@ export const ELUS = [
   {
     id: 7, nom: "Édouard Philippe", parti: "Horizons", emoji: "🌊", couleur: "#00838f",
     alias: ["Edouard la Barbe", "Le Havrais", "Barbe Grise"],
-    photo_url: "/photos/edouard-philippe.png",
+    photo_url: "/photos/edouard-philippe.webp",
     fonction: "Maire du Havre / Ancien 1er Ministre",
     mandats: ["Premier ministre (2017-2020)", "Maire du Havre (2010-2017, 2020-présent)", "Député de la Seine-Maritime (2012-2017)"],
     affaires: [],

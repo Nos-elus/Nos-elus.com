@@ -446,8 +446,21 @@ foreach ($cibles as $elu) {
     $newBio = fetchWikipediaSummary($wikiTitle);
     pause();
 
-    // 2.4 — URL fiche Wikipedia
-    $newUrlFiche = buildWikipediaUrl($wikiTitle);
+    // 2.4 — URL fiche : priorité sources officielles, wikipedia en dernier recours
+    //   Hiérarchie : assemblee-nationale.fr (an_deputes_mapping)
+    //              > senat.fr (à venir si mapping ajouté)
+    //              > europarl.europa.eu (à venir)
+    //              > wikipedia (fallback uniquement si rien d'autre)
+    $newUrlFiche = null;
+    $stmtAn = $pdo->prepare("SELECT acteur_ref FROM an_deputes_mapping WHERE elu_id = :id LIMIT 1");
+    $stmtAn->execute([':id' => $elu['id']]);
+    $acteurRef = $stmtAn->fetchColumn();
+    if ($acteurRef && preg_match('/^PA\d+$/', $acteurRef)) {
+        $newUrlFiche = "https://www.assemblee-nationale.fr/dyn/deputes/$acteurRef";
+    }
+    if (!$newUrlFiche) {
+        $newUrlFiche = buildWikipediaUrl($wikiTitle); // dernier recours
+    }
 
     // 2.5 — Préparer l'UPDATE — UNIQUEMENT champs vides
     $sets   = [];

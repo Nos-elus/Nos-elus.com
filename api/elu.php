@@ -71,11 +71,28 @@ $data = cachedResponse('elu', ['id' => $id], CACHE_TTL_MEDIUM, function() use ($
     $stmtVotes->execute([':id' => $elu['id']]);
     $elu['votes'] = $stmtVotes->fetchAll();
 
-    // Activité parlementaire (si député AN)
+    // Activité parlementaire — uniquement si l'élu est actuellement parlementaire (mandat actif)
+    // Sinon les stats (taux_global, nb_questions historiques) n'ont aucun sens
+    $hasActiveParlMandat = false;
+    foreach ($elu['mandats'] as $m) {
+        if (!empty($m['date_fin'])) continue;
+        $t = mb_strtolower($m['titre'] ?? '', 'UTF-8');
+        if (str_contains($t, 'député') || str_contains($t, 'sénateur') || str_contains($t, 'sénatrice') || str_contains($t, 'parlement européen')) {
+            $hasActiveParlMandat = true;
+            break;
+        }
+    }
     $stmtActiv = $pdo->prepare("SELECT * FROM activite_parlementaire WHERE elu_id = :id LIMIT 1");
     $stmtActiv->execute([':id' => $elu['id']]);
     $activite = $stmtActiv->fetch();
-    if ($activite) {
+    // Ne pas retourner activite_parlementaire si données creuses (cas sénateurs : on ne tracke pas
+    // leurs votes, le taux 15% est trompeur quand nb_votes=0 ET nb_reunions_convoque=0).
+    $hasRealData = $activite && (
+        (int)($activite['nb_votes'] ?? 0) > 0
+        || (int)($activite['nb_reunions_convoque'] ?? 0) > 0
+        || (int)($activite['total_scrutins'] ?? 0) > 0
+    );
+    if ($activite && $hasActiveParlMandat && $hasRealData) {
         // Détecter si l'élu a/a eu un poste qui l'empêche de voter normalement
         $postesBloquants = [];
         foreach ($elu['mandats'] as $m) {

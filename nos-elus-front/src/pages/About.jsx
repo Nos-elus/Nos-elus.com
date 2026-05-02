@@ -36,6 +36,7 @@ const About = () => (
           ["LegifrSS (proxy Legifrance)", "https://legifrss.org", "Veille juridique, lois et décisions du Conseil constitutionnel"],
           ["Wikidata", "https://www.wikidata.org", "Données biographiques, mandats historiques, affiliations"],
           ["Wikimedia Commons", "https://commons.wikimedia.org", "Photos libres de droit"],
+          ["Service-Public.fr — Annuaire de l'administration", "https://www.service-public.gouv.fr/", "Annuaire officiel des mairies, préfectures et services publics"],
           ["la-mairie.com", "https://www.la-mairie.com", "Coordonnées des mairies (téléphone, email, adresse)"],
           ["Conseil constitutionnel", "https://www.conseil-constitutionnel.fr", "Membres, décisions, compositions"],
         ].map(([name, url, desc], i) => (

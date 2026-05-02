@@ -217,8 +217,8 @@ const Palmares = () => {
                   </div>
                   <div style={{
                     fontFamily: S.font, fontSize: rank === 0 ? 15 : 13, fontWeight: 900,
-                    color: S.textMain, marginTop: 8, maxWidth: sizes[rank] + 30,
-                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    color: S.textMain, marginTop: 8, maxWidth: 140,
+                    lineHeight: 1.2, wordBreak: "break-word", textAlign: "center",
                   }}>{displayName}</div>
                   <div style={{
                     fontFamily: S.font, fontSize: 11, color: colors[rank], fontWeight: 800, marginTop: 2,
