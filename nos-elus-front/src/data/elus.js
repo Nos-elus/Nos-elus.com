@@ -31,7 +31,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "FN", annee: 1992 }, { parti: "RN", annee: 2018 }],
 
-    radar: { integrite: 3, transparence: 3, assiduite: 7, coherence: 6, bilan: 4 },
+    radar: { transparence: 3, assiduite: 7, coherence: 6, bilan: 4 },
   },
   {
     id: 2, nom: "Nicolas Sarkozy", parti: "LR", emoji: "🏛️", couleur: "#0d47a1",
@@ -64,7 +64,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "RPR", annee: 1983 }, { parti: "UMP", annee: 2002 }, { parti: "LR", annee: 2015 }],
 
-    radar: { integrite: 2, transparence: 2, assiduite: 8, coherence: 5, bilan: 6 },
+    radar: { transparence: 2, assiduite: 8, coherence: 5, bilan: 6 },
   },
   {
     id: 3, nom: "François Hollande", parti: "PS", emoji: "🌹", couleur: "#e91e63",
@@ -96,7 +96,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "PS", annee: 1979 }],
 
-    radar: { integrite: 7, transparence: 5, assiduite: 6, coherence: 4, bilan: 5 },
+    radar: { transparence: 5, assiduite: 6, coherence: 4, bilan: 5 },
   },
   {
     id: 4, nom: "Jean-Luc Mélenchon", parti: "LFI", emoji: "✊", couleur: "#c62828",
@@ -128,7 +128,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "PS", annee: 1977 }, { parti: "LFI", annee: 2016 }],
 
-    radar: { integrite: 6, transparence: 4, assiduite: 8, coherence: 7, bilan: 5 },
+    radar: { transparence: 4, assiduite: 8, coherence: 7, bilan: 5 },
   },
   {
     id: 5, nom: "Emmanuel Macron", parti: "Renaissance", emoji: "🟡", couleur: "#ff8f00",
@@ -158,7 +158,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "PS", annee: 2006 }, { parti: "En Marche", annee: 2016 }, { parti: "LREM", annee: 2018 }, { parti: "Renaissance", annee: 2022 }],
 
-    radar: { integrite: 5, transparence: 3, assiduite: 9, coherence: 4, bilan: 5 },
+    radar: { transparence: 3, assiduite: 9, coherence: 4, bilan: 5 },
   },
   {
     id: 6, nom: "Éric Zemmour", parti: "Reconquête", emoji: "⚔️", couleur: "#37474f",
@@ -187,7 +187,7 @@ export const ELUS = [
       sources: ["Appartement Paris", "Droits d'auteur best-sellers", "Placements financiers"],
     },
 
-    radar: { integrite: 3, transparence: 3, assiduite: 2, coherence: 6, bilan: 2 },
+    radar: { transparence: 3, assiduite: 2, coherence: 6, bilan: 2 },
   },
   {
     id: 7, nom: "Édouard Philippe", parti: "Horizons", emoji: "🌊", couleur: "#00838f",
@@ -216,7 +216,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "UMP", annee: 1995 }, { parti: "LR", annee: 2015 }, { parti: "Horizons", annee: 2021 }],
 
-    radar: { integrite: 8, transparence: 6, assiduite: 8, coherence: 7, bilan: 7 },
+    radar: { transparence: 6, assiduite: 8, coherence: 7, bilan: 7 },
   },
   {
     id: 8, nom: "François Fillon", parti: "LR", emoji: "🧊", couleur: "#283593",
@@ -247,7 +247,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "RPR", annee: 1981 }, { parti: "UMP", annee: 2002 }, { parti: "LR", annee: 2015 }],
 
-    radar: { integrite: 2, transparence: 2, assiduite: 7, coherence: 5, bilan: 5 },
+    radar: { transparence: 2, assiduite: 7, coherence: 5, bilan: 5 },
   },
   {
     id: 9, nom: "Rachida Dati", parti: "LR / Renaissance", emoji: "⚡", couleur: "#6a1b9a",
@@ -278,7 +278,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "UMP", annee: 2003 }, { parti: "LR", annee: 2015 }, { parti: "LR / Renaissance", annee: 2024 }],
 
-    radar: { integrite: 4, transparence: 3, assiduite: 7, coherence: 3, bilan: 5 },
+    radar: { transparence: 3, assiduite: 7, coherence: 3, bilan: 5 },
   },
   {
     id: 10, nom: "Sandrine Rousseau", parti: "EELV", emoji: "🌿", couleur: "#2e7d32",
@@ -308,7 +308,7 @@ export const ELUS = [
       sources: ["Appartement Paris (copropriete)", "Livrets epargne"],
     },
 
-    radar: { integrite: 7, transparence: 6, assiduite: 6, coherence: 5, bilan: 4 },
+    radar: { transparence: 6, assiduite: 6, coherence: 5, bilan: 4 },
   },
   {
     id: 11, nom: "Gérald Darmanin", parti: "Renaissance", emoji: "🛡️", couleur: "#e65100",
@@ -338,7 +338,7 @@ export const ELUS = [
     },
     historique_partis: [{ parti: "UMP", annee: 2008 }, { parti: "LR", annee: 2015 }, { parti: "Renaissance", annee: 2020 }],
 
-    radar: { integrite: 4, transparence: 4, assiduite: 8, coherence: 5, bilan: 5 },
+    radar: { transparence: 4, assiduite: 8, coherence: 5, bilan: 5 },
   },
   {
     id: 12, nom: "François Bayrou", parti: "MoDem", emoji: "🟠", couleur: "#ef6c00",
@@ -368,6 +368,6 @@ export const ELUS = [
       sources: ["Maison Pau", "Appartement Paris", "Vignoble familial (Bearn)", "Droits d'auteur"],
     },
 
-    radar: { integrite: 6, transparence: 5, assiduite: 7, coherence: 6, bilan: 5 },
+    radar: { transparence: 5, assiduite: 7, coherence: 6, bilan: 5 },
   },
 ];

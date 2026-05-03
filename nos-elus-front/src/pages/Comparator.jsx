@@ -10,7 +10,7 @@ const RechartsRadar = lazy(() => import("recharts").then(m => ({
   default: ({ radar, color }) => {
     const { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } = m;
     const data = [
-      { s: "Int.", v: radar.integrite }, { s: "Transp.", v: radar.transparence },
+      { s: "Transp.", v: radar.transparence },
       { s: "Assid.", v: radar.assiduite }, { s: "Cohér.", v: radar.coherence },
       { s: "Bilan", v: radar.bilan },
     ];
@@ -33,7 +33,7 @@ const slugify = (text) =>
 // Score global : moyenne radar - malus affaires
 const computeScore = (elu) => {
   const r = elu.radar;
-  const radarAvg = (r.integrite + r.transparence + r.assiduite + r.coherence + r.bilan) / 5;
+  const radarAvg = (r.transparence + r.assiduite + r.coherence + r.bilan) / 4;
   const malus = Math.min(elu.affaires.length * 0.5, 3);
   return Math.max(0, Math.round((radarAvg - malus) * 10) / 10);
 };

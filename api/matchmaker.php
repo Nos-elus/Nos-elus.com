@@ -13,7 +13,6 @@ $parti       = getStringParam('parti', 100);
 $mandats_min = isset($_GET['mandats_min']) ? (int)$_GET['mandats_min'] : -1;
 $mandats_max = isset($_GET['mandats_max']) ? (int)$_GET['mandats_max'] : -1;
 $casseroles  = isset($_GET['casseroles_max']) ? (int)$_GET['casseroles_max'] : -1; // -1 = pas de filtre
-$integrite   = getIntParam('integrite_min', 0);
 $photo       = getStringParam('photo', 10);        // oui, non, ou vide
 $poste       = getStringParam('poste', 50);
 $salaire_min = getIntParam('salaire_min', 0);
@@ -206,12 +205,6 @@ if ($fortune_min > 0 || ($fortune_max > 0 && $fortune_max < 25000000)) {
     }
 }
 
-// Intégrité minimum
-if ($integrite > 0) {
-    $where[] = "score_integrite >= :integrite";
-    $binds[':integrite'] = $integrite;
-}
-
 $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
 // Sous-requêtes pour mandats et casseroles
@@ -236,7 +229,7 @@ $havingClause = $havingParts ? 'HAVING ' . implode(' AND ', $havingParts) : '';
 
 // Sort
 $allowedSorts = [
-    'score' => '(e.score_integrite + e.score_transparence + e.score_assiduite + e.score_coherence + e.score_bilan) DESC',
+    'score' => '(e.score_transparence + e.score_assiduite + e.score_coherence + e.score_bilan) DESC',
     'casseroles' => 'nb_casseroles DESC',
     'mandats' => 'nb_mandats DESC',
     'age_asc' => 'e.date_naissance DESC',
@@ -269,10 +262,10 @@ $total = (int) $stmt->fetchColumn();
 $sql = "
     SELECT e.id, e.nom, e.prenom, e.slug, e.parti, e.fonction, e.emoji, e.couleur,
            e.photo_url, e.date_naissance, e.region, e.departement, e.nb_consultations,
-           e.score_integrite, e.score_transparence, e.score_assiduite, e.score_coherence, e.score_bilan,
+           e.score_transparence, e.score_assiduite, e.score_coherence, e.score_bilan,
            COALESCE(mc.nb_mandats, 0) AS nb_mandats,
            COALESCE(ac.nb_affaires, 0) AS nb_casseroles,
-           (e.score_integrite + e.score_transparence + e.score_assiduite + e.score_coherence + e.score_bilan) AS score_total,
+           (e.score_transparence + e.score_assiduite + e.score_coherence + e.score_bilan) AS score_total,
            CASE WHEN e.date_naissance IS NOT NULL AND e.date_naissance > '1900-01-01'
                 THEN TIMESTAMPDIFF(YEAR, e.date_naissance, CURDATE())
                 ELSE NULL END AS age

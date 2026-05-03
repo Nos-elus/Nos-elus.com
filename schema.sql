@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS elus (
     lieu_naissance VARCHAR(255),
     bio TEXT,
     patrimoine_info TEXT,
-    score_integrite TINYINT DEFAULT 5,
     score_transparence TINYINT DEFAULT 5,
     score_assiduite TINYINT DEFAULT 5,
     score_coherence TINYINT DEFAULT 5,
@@ -261,19 +260,19 @@ CREATE TABLE IF NOT EXISTS inbox (
 
 -- ── Seed : Élus ──
 
-INSERT INTO elus (id, nom, parti, fonction, emoji, couleur, patrimoine_info, score_integrite, score_transparence, score_assiduite, score_coherence, score_bilan, slug, source_api) VALUES
-(1, 'Marine Le Pen', 'RN', 'Députée du Pas-de-Calais', '🦅', '#1a237e', 'Déclaration HATVP disponible', 3, 3, 7, 6, 4, 'marine-le-pen', 'manual'),
-(2, 'Nicolas Sarkozy', 'LR', 'Ancien Président de la République', '🏛️', '#0d47a1', 'Déclaration HATVP disponible', 2, 2, 8, 5, 6, 'nicolas-sarkozy', 'manual'),
-(3, 'François Hollande', 'PS', 'Ancien Président / Député', '🌹', '#e91e63', 'Déclaration HATVP disponible', 7, 5, 6, 4, 5, 'francois-hollande', 'manual'),
-(4, 'Jean-Luc Mélenchon', 'LFI', 'Député des Bouches-du-Rhône', '✊', '#c62828', 'Déclaration HATVP disponible', 6, 4, 8, 7, 5, 'jean-luc-melenchon', 'manual'),
-(5, 'Emmanuel Macron', 'Renaissance', 'Président de la République', '🟡', '#ff8f00', 'Déclaration HATVP disponible', 5, 3, 9, 4, 5, 'emmanuel-macron', 'manual'),
-(6, 'Éric Zemmour', 'Reconquête', 'Ancien candidat présidentiel', '⚔️', '#37474f', 'Non déclaré (non élu)', 3, 3, 2, 6, 2, 'eric-zemmour', 'manual'),
-(7, 'Édouard Philippe', 'Horizons', 'Maire du Havre / Ancien 1er Ministre', '🌊', '#00838f', 'Déclaration HATVP disponible', 8, 6, 8, 7, 7, 'edouard-philippe', 'manual'),
-(8, 'François Fillon', 'LR', 'Ancien Premier Ministre', '🧊', '#283593', 'Déclaration HATVP disponible', 2, 2, 7, 5, 5, 'francois-fillon', 'manual'),
-(9, 'Rachida Dati', 'LR / Renaissance', 'Ministre de la Culture', '⚡', '#6a1b9a', 'Déclaration HATVP disponible', 4, 3, 7, 3, 5, 'rachida-dati', 'manual'),
-(10, 'Sandrine Rousseau', 'EELV', 'Députée de Paris', '🌿', '#2e7d32', 'Déclaration HATVP disponible', 7, 6, 6, 5, 4, 'sandrine-rousseau', 'manual'),
-(11, 'Gérald Darmanin', 'Renaissance', 'Ministre de la Justice', '🛡️', '#e65100', 'Déclaration HATVP disponible', 4, 4, 8, 5, 5, 'gerald-darmanin', 'manual'),
-(12, 'François Bayrou', 'MoDem', 'Premier Ministre', '🟠', '#ef6c00', 'Déclaration HATVP disponible', 6, 5, 7, 6, 5, 'francois-bayrou', 'manual');
+INSERT INTO elus (id, nom, parti, fonction, emoji, couleur, patrimoine_info, score_transparence, score_assiduite, score_coherence, score_bilan, slug, source_api) VALUES
+(1, 'Marine Le Pen', 'RN', 'Députée du Pas-de-Calais', '🦅', '#1a237e', 'Déclaration HATVP disponible', 3, 7, 6, 4, 'marine-le-pen', 'manual'),
+(2, 'Nicolas Sarkozy', 'LR', 'Ancien Président de la République', '🏛️', '#0d47a1', 'Déclaration HATVP disponible', 2, 8, 5, 6, 'nicolas-sarkozy', 'manual'),
+(3, 'François Hollande', 'PS', 'Ancien Président / Député', '🌹', '#e91e63', 'Déclaration HATVP disponible', 5, 6, 4, 5, 'francois-hollande', 'manual'),
+(4, 'Jean-Luc Mélenchon', 'LFI', 'Député des Bouches-du-Rhône', '✊', '#c62828', 'Déclaration HATVP disponible', 4, 8, 7, 5, 'jean-luc-melenchon', 'manual'),
+(5, 'Emmanuel Macron', 'Renaissance', 'Président de la République', '🟡', '#ff8f00', 'Déclaration HATVP disponible', 3, 9, 4, 5, 'emmanuel-macron', 'manual'),
+(6, 'Éric Zemmour', 'Reconquête', 'Ancien candidat présidentiel', '⚔️', '#37474f', 'Non déclaré (non élu)', 3, 2, 6, 2, 'eric-zemmour', 'manual'),
+(7, 'Édouard Philippe', 'Horizons', 'Maire du Havre / Ancien 1er Ministre', '🌊', '#00838f', 'Déclaration HATVP disponible', 6, 8, 7, 7, 'edouard-philippe', 'manual'),
+(8, 'François Fillon', 'LR', 'Ancien Premier Ministre', '🧊', '#283593', 'Déclaration HATVP disponible', 2, 7, 5, 5, 'francois-fillon', 'manual'),
+(9, 'Rachida Dati', 'LR / Renaissance', 'Ministre de la Culture', '⚡', '#6a1b9a', 'Déclaration HATVP disponible', 3, 7, 3, 5, 'rachida-dati', 'manual'),
+(10, 'Sandrine Rousseau', 'EELV', 'Députée de Paris', '🌿', '#2e7d32', 'Déclaration HATVP disponible', 6, 6, 5, 4, 'sandrine-rousseau', 'manual'),
+(11, 'Gérald Darmanin', 'Renaissance', 'Ministre de la Justice', '🛡️', '#e65100', 'Déclaration HATVP disponible', 4, 8, 5, 5, 'gerald-darmanin', 'manual'),
+(12, 'François Bayrou', 'MoDem', 'Premier Ministre', '🟠', '#ef6c00', 'Déclaration HATVP disponible', 5, 7, 6, 5, 'francois-bayrou', 'manual');
 
 -- ── Seed : Mandats ──
 

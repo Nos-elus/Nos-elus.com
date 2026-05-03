@@ -50,7 +50,7 @@ $data = cachedResponse('elus_list', $params, CACHE_TTL_SHORT, function() use ($p
     // Fetch page
     $stmt = $pdo->prepare("
         SELECT id, nom, prenom, parti, fonction, emoji, photo_url, slug, nb_consultations,
-               score_integrite, score_transparence, score_assiduite, score_coherence, score_bilan
+               score_transparence, score_assiduite, score_coherence, score_bilan
         FROM elus
         $whereClause
         ORDER BY $orderClause

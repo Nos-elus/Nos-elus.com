@@ -26,7 +26,7 @@ $data = cachedResponse('elu', ['id' => $id], CACHE_TTL_MEDIUM, function() use ($
     $stmt = $pdo->prepare("
         SELECT e.id, e.nom, e.prenom, e.slug, e.parti, e.fonction, e.emoji, e.couleur, e.photo_url,
                e.date_naissance, e.lieu_naissance, e.bio, e.alias, e.patrimoine_info, e.patrimoine_detail,
-               e.score_integrite, e.score_transparence, e.score_assiduite, e.score_coherence, e.score_bilan,
+               e.score_transparence, e.score_assiduite, e.score_coherence, e.score_bilan,
                e.population, e.salaire_brut, e.url_hatvp, e.profession,
                COALESCE(e.hatvp_non_declarant, 0) AS hatvp_non_declarant,
                e.email, e.telephone, e.adresse, e.url_fiche,

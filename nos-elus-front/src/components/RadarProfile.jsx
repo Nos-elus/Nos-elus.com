@@ -3,7 +3,6 @@ import { S } from "../utils/constants";
 
 const RadarProfile = ({ radar, nom }) => {
   const data = [
-    { subject: "Intégrité", value: radar.integrite },
     { subject: "Transparence", value: radar.transparence },
     { subject: "Assiduité", value: radar.assiduite },
     { subject: "Cohérence", value: radar.coherence },

@@ -31,21 +31,60 @@ Pas de framework backend, pas de dépendance lourde côté serveur — c'est vol
 
 ## Sources de données
 
-Toutes les données affichées proviennent de sources publiques officielles :
+Toutes les données affichées proviennent de sources publiques officielles ou ouvertes. Aucune donnée privée, aucune source confidentielle.
 
-| Source | Données |
-|--------|---------|
-| [Répertoire National des Élus](https://www.data.gouv.fr/fr/datasets/repertoire-national-des-elus-1/) | ~500k élus locaux et nationaux |
-| [data.assemblee-nationale.fr](https://data.assemblee-nationale.fr/) | Députés, votes, scrutins, mandats |
-| [data.senat.fr](https://data.senat.fr/) | Sénateurs, commissions |
-| [NosDéputés.fr](https://www.nosdeputes.fr/api) | Activité parlementaire des députés |
-| [HATVP](https://www.hatvp.fr/open-data/) | Déclarations de patrimoine et d'intérêts |
-| [Parlement européen Open Data](https://data.europarl.europa.eu/) | Eurodéputés, votes UE |
-| [JUDILIBRE (PISTE)](https://piste.gouv.fr/) | Décisions de justice publiées |
-| [Wikidata / Wikimedia Commons](https://www.wikidata.org/) | Photos sous licences libres, biographies |
-| [api-geo.gouv.fr (INSEE)](https://geo.api.gouv.fr/) | Population des communes (calcul indemnités) |
+### Élus, mandats, indemnités
 
-Voir [`docs/sources-donnees.md`](docs/sources-donnees.md) pour le détail.
+| Source | Données récupérées |
+|--------|---------------------|
+| [Répertoire National des Élus (RNE)](https://www.data.gouv.fr/fr/datasets/repertoire-national-des-elus-1/) | ~500k élus locaux et nationaux : nom, mandat, dates, commune |
+| [RNE enrichi nuance politique (data.gouv.fr)](https://www.data.gouv.fr/fr/datasets/communes-enrichies-avec-la-nuance-politique-france/) | Étiquette politique des communes |
+| [Annuaire de l'administration (api-lannuaire.service-public.fr)](https://api-lannuaire.service-public.fr/) | Coordonnées officielles des mairies, préfectures, sous-préfectures |
+
+### Activité parlementaire
+
+| Source | Données récupérées |
+|--------|---------------------|
+| [data.assemblee-nationale.fr](https://data.assemblee-nationale.fr/) | Députés actifs (CSV), scrutins publics (JSON), questions écrites, agenda des commissions |
+| [NosDéputés.fr](https://www.nosdeputes.fr/api) | Recherche de députés (fallback DataFetcher) |
+| [Parlement européen — europarl.europa.eu](https://www.europarl.europa.eu/meps/fr/full-list/xml) | Liste des eurodéputés français + photos officielles (`/mepphoto/<id>.jpg`) |
+
+### Patrimoine, transparence, justice
+
+| Source | Données récupérées |
+|--------|---------------------|
+| [HATVP open data](https://www.hatvp.fr/open-data/) | Déclarations de patrimoine et d'intérêts (CSV `liste.csv`) |
+| [JUDILIBRE / PISTE (Cour de cassation)](https://piste.gouv.fr/) | Décisions de la Cour de cassation publiées |
+| [DILA — Open Data Conseil constitutionnel](https://echanges.dila.gouv.fr/OPENDATA/CONSTIT/) | Décisions du Conseil constitutionnel |
+| [LegifrSS](https://legifrss.org/) | Veille juridique (lois, décisions, Conseil constitutionnel) |
+
+### Résultats électoraux
+
+| Source | Données récupérées |
+|--------|---------------------|
+| [Élections municipales 2020 (data.gouv.fr)](https://www.data.gouv.fr/fr/datasets/elections-municipales-2020-resultats/) | Résultats par commune (CSV) |
+| [Élections municipales 2026 (data.gouv.fr)](https://www.data.gouv.fr/fr/datasets/elections-municipales-2026-resultats-du-premier-tour/) | Résultats 1er et 2nd tour |
+
+### Compléments biographiques et iconographiques
+
+| Source | Données récupérées |
+|--------|---------------------|
+| [Wikipédia FR (API REST)](https://fr.wikipedia.org/api/rest_v1/) | Résumés biographiques, dates, alias |
+| [Wikidata / Wikimedia Commons](https://www.wikidata.org/) | Photos sous licences libres, identifiants persistants |
+
+### Notification de référencement
+
+| Source | Usage |
+|--------|-------|
+| [IndexNow (api.indexnow.org)](https://www.indexnow.org/) | Notification proactive de nouvelles fiches à Bing / Yandex |
+
+### Sources écartées ou non utilisées
+
+- **data.senat.fr** : non exploitée à ce jour (aucun scrutin SENAT_ en BDD). Une intégration nécessiterait un mapping similaire à `an_deputes_mapping`.
+- **Pappers, mon-maire.fr et sites de recopiage** : non autorisés comme source primaire (corroboration uniquement).
+- **Wikipédia comme source unique** : interdite — toujours croisée avec une source officielle.
+
+Voir [`docs/sources-donnees.md`](docs/sources-donnees.md) pour le détail des champs et fréquence de mise à jour.
 
 ---
 
@@ -105,12 +144,13 @@ Chaque affaire **doit** avoir une URL source vérifiable. La présomption d'inno
 
 ### Scores affichés
 
-Cinq indicateurs sont prévus en BDD (`elus.score_*`, échelle 0-10) :
+Le projet **ne porte pas de jugement moral** sur les élus. Aucune notation d'« intégrité » n'est calculée, ni affichée — la base ne pénalise personne par algorithme. Les affaires judiciaires sont **listées factuellement** avec leur statut juridique (`affaires.statut`), et c'est au visiteur de juger.
+
+Quatre indicateurs sont prévus en BDD (`elus.score_*`, échelle 0-10) :
 
 | Score | État actuel | Détail |
 |---|---|---|
 | **Assiduité** | ✅ Calculé | Taux d'activité parlementaire (formule ci-dessus). Recalculé par `cron-taux-presence.php`. |
-| **Intégrité** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à implémenter (signal envisagé : nombre et gravité d'affaires condamnées). |
 | **Transparence** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à implémenter (signal envisagé : présence d'une déclaration HATVP, complétude du profil). |
 | **Cohérence** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à définir. |
 | **Bilan** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à définir. |

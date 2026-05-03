@@ -33,7 +33,7 @@ $data = cachedResponse('search', ['q' => $q], CACHE_TTL_SEARCH, function() use (
             $stmt = $pdo->query("
                 SELECT id, nom, prenom, parti, fonction, emoji, photo_url,
                        slug, nb_consultations,
-                       score_integrite, score_transparence, score_assiduite, score_coherence, score_bilan
+                       score_transparence, score_assiduite, score_coherence, score_bilan
                 FROM elus WHERE id IN ($placeholders)
                 ORDER BY nb_consultations DESC
                 LIMIT 20
@@ -80,7 +80,7 @@ function searchLocal(PDO $pdo, string $q): array {
             $stmt = $pdo->prepare('
                 SELECT id, nom, prenom, parti, fonction, emoji, photo_url,
                        slug, nb_consultations,
-                       score_integrite, score_transparence, score_assiduite, score_coherence, score_bilan,
+                       score_transparence, score_assiduite, score_coherence, score_bilan,
                        MATCH(nom, prenom) AGAINST(:q1 IN BOOLEAN MODE) AS relevance,
                        (CASE
                            WHEN fonction LIKE "%Président de la République%" THEN 100
@@ -128,7 +128,7 @@ function searchLocal(PDO $pdo, string $q): array {
     $stmt = $pdo->prepare('
         SELECT id, nom, prenom, parti, fonction, emoji, photo_url,
                slug, nb_consultations,
-               score_integrite, score_transparence, score_assiduite, score_coherence, score_bilan,
+               score_transparence, score_assiduite, score_coherence, score_bilan,
                (CASE
                    WHEN fonction LIKE "%Président de la République%" THEN 100
                    WHEN fonction LIKE "%Premier ministre%" OR fonction LIKE "%Premier Ministre%" THEN 95
