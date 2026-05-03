@@ -17,7 +17,7 @@ if (!$slug) {
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT nom, prenom, fonction, parti, photo_url FROM elus WHERE slug = :s LIMIT 1");
+$stmt = $pdo->prepare("SELECT nom, prenom, fonction, parti, photo_url, updated_at FROM elus WHERE slug = :s LIMIT 1");
 $stmt->execute([':s' => $slug]);
 $elu = $stmt->fetch();
 
@@ -30,7 +30,10 @@ $nom = htmlspecialchars(trim(($elu['prenom'] ?: '') . ' ' . $elu['nom']));
 $desc = htmlspecialchars(($elu['fonction'] ?: 'Élu') . ($elu['parti'] ? ' — ' . $elu['parti'] : ''));
 $slugSafe = htmlspecialchars($slug, ENT_QUOTES, 'UTF-8');
 $url = "https://nos-elus.com/elu/$slugSafe";
-$ogImage = "https://nos-elus.com/api/og-image.php?slug=" . urlencode($slug) . "&v=" . date('Ymd');
+// Cache-buster basé sur updated_at de la fiche (change à chaque modif → force Twitter à re-fetch).
+// Fallback date du jour si updated_at indisponible.
+$cacheV = preg_replace('/\D/', '', $elu['updated_at'] ?? '') ?: date('Ymd');
+$ogImage = "https://nos-elus.com/api/og-image.php?slug=" . urlencode($slug) . "&v=" . $cacheV;
 $photo = $elu['photo_url'] ? "https://nos-elus.com" . htmlspecialchars($elu['photo_url'], ENT_QUOTES, 'UTF-8') : $ogImage;
 
 $html = file_get_contents($indexFile);
