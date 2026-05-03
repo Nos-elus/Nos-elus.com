@@ -200,8 +200,15 @@ $data = cachedResponse('elu', ['id' => $id], CACHE_TTL_MEDIUM, function() use ($
         'cese'         => ['brut' => 4126, 'label' => 'Indemnité membre du CESE', 'source' => 'Décret n°84-558 art. 28'],
         'pres_cese'    => ['brut' => 9940, 'label' => 'Traitement président du CESE', 'source' => 'Ordonnance n°58-1360 — aligné PM'],
         'defenseur'    => ['brut' => 13500, 'label' => 'Traitement Défenseur des droits', 'source' => 'Loi organique n°2011-333 art. 11'],
-        'pres_an'      => ['brut' => 14480, 'net' => 11000, 'label' => 'Indemnité président de l\'Assemblée nationale', 'source' => 'Ordonnance n°58-1210 — IPB + IF 100%'],
-        'pres_senat'   => ['brut' => 14480, 'net' => 11000, 'label' => 'Indemnité président du Sénat', 'source' => 'Ordonnance n°58-1210 — IPB + IF 100%'],
+        // Indemnités de fonction Bureau AN/Sénat (s'ajoutent à l'IPB de la ligne 'depute'/'senateur')
+        // Sources : senat.fr/connaitre-le-senat/role-et-fonctionnement/lindemnite-parlementaire.html
+        //          assemblee-nationale.fr/dyn/synthese/deputes-groupes-parlementaires/la-situation-materielle-du-depute
+        'pres_an'      => ['brut' => 7698.50, 'label' => 'Indemnité de fonction président de l\'Assemblée nationale', 'source' => 'Bureau AN — barème 2024'],
+        'pres_senat'   => ['brut' => 7591.58, 'label' => 'Indemnité de fonction président du Sénat',                'source' => 'Bureau Sénat — barème 2024'],
+        'vp_an'        => ['brut' => 1099.79, 'label' => 'Indemnité de fonction vice-président de l\'Assemblée nationale', 'source' => 'Bureau AN — barème 2024'],
+        'vp_senat'     => ['brut' => 2184.30, 'label' => 'Indemnité de fonction vice-président du Sénat',         'source' => 'Bureau Sénat — barème 2024'],
+        'questeur_an'  => ['brut' => 5300.36, 'label' => 'Indemnité de fonction questeur de l\'Assemblée nationale', 'source' => 'Bureau AN — barème 2024'],
+        'questeur_senat'=> ['brut' => 4444.97,'label' => 'Indemnité de fonction questeur du Sénat',                'source' => 'Bureau Sénat — barème 2024'],
         'pres_epci'    => ['brut_min' => 1763, 'brut_max' => 5809, 'label' => 'Indemnité président d\'EPCI/métropole', 'detail' => 'Varie selon la population', 'source' => 'CGCT art. L5211-12'],
         'vp_epci'      => ['brut_min' => 801, 'brut_max' => 3245, 'label' => 'Indemnité vice-président d\'EPCI', 'detail' => 'Varie selon la population', 'source' => 'CGCT art. L5211-12 III'],
         'cons_territorial' => ['brut_min' => 1603, 'brut_max' => 1603, 'label' => 'Indemnité conseiller territorial', 'detail' => 'Corse, Guyane, Martinique, SPM', 'source' => 'CGCT art. L7124-3 / L7224-3'],
@@ -253,7 +260,12 @@ $data = cachedResponse('elu', ['id' => $id], CACHE_TTL_MEDIUM, function() use ($
         if (str_contains($t, 'cese') || str_contains($t, 'conseil économique') || str_contains($t, 'conseil economique')) return 'cese';
         // Défenseur des droits
         if (str_contains($t, 'défenseur des droits')) return 'defenseur';
-        // Présidents de chambre
+        // Bureau AN/Sénat : VP et Questeurs AVANT le pres_* (sinon str_contains matche le sous-mot "président")
+        if (str_contains($t, 'questeur') && str_contains($t, 'sénat'))                  return 'questeur_senat';
+        if (str_contains($t, 'questeur') && str_contains($t, 'assemblée'))              return 'questeur_an';
+        if (str_contains($t, 'vice-président') && str_contains($t, 'sénat'))            return 'vp_senat';
+        if (str_contains($t, 'vice-président') && str_contains($t, 'assemblée'))        return 'vp_an';
+        // Présidents de chambre (uniquement le titulaire — VP capturés au-dessus)
         if (str_contains($t, 'président de l\'assemblée nationale') || str_contains($t, 'président de l\'an')) return 'pres_an';
         if (str_contains($t, 'président du sénat')) return 'pres_senat';
         if (str_contains($t, 'conseiller de paris') || str_contains($t, 'conseillère de paris')) return 'cons_paris';
