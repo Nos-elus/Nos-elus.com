@@ -215,9 +215,11 @@ const PalmaresMandat = ({ elu }) => {
 // Moyenne patrimoine tous élus connus (approximation)
 const AVG_PATRIMOINE = { immobilier: 580000, mobilier: 85000, revenus_annuels: 130000, total: 665000 };
 
-const TimelineTab = ({ elu }) => {
+const TimelineTab = ({ elu, initialFilter = "all" }) => {
   const [visibleCount, setVisibleCount] = useState(10);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(initialFilter);
+  // Si initialFilter change (clic depuis ministats), mettre à jour
+  useEffect(() => { setFilter(initialFilter); }, [initialFilter]);
 
   const events = [];
   (elu.affaires || []).forEach(a => events.push({
@@ -341,6 +343,7 @@ const EluProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("timeline");
+  const [timelineFilter, setTimelineFilter] = useState("all");
   const [voteFilter, setVoteFilter] = useState(null);
   const [showMethodo, setShowMethodo] = useState(false);
   const [showContactPopup, setShowContactPopup] = useState(false);
@@ -760,8 +763,8 @@ const EluProfile = () => {
             const chips = [
               tauxGlobal !== null ? { icon: "📊", label: `${Math.round(tauxGlobal)}% actif`, color: tauxColor, tab: "votes", title: "Taux d'activité parlementaire" } : null,
               coutLabel ? { icon: "💸", label: coutLabel, color: S.gold, tab: "patrimoine", title: "Coût total carrière" } : null,
-              { icon: <IconCasserole size={16} color={nbAffaires > 0 ? S.red : S.green} />, label: nbAffaires + " affaire" + (nbAffaires !== 1 ? "s" : ""), color: nbAffaires > 0 ? S.red : S.green, tab: "timeline", title: "Casseroles" },
-              { icon: <IconMandat size={16} color={S.purple} />, label: nbMandats + " mandat" + (nbMandats !== 1 ? "s" : ""), color: S.purple, tab: "timeline", title: "Mandats" },
+              { icon: <IconCasserole size={16} color={nbAffaires > 0 ? S.red : S.green} />, label: nbAffaires + " affaire" + (nbAffaires !== 1 ? "s" : ""), color: nbAffaires > 0 ? S.red : S.green, tab: "timeline", subFilter: "affaire", title: "Casseroles" },
+              { icon: <IconMandat size={16} color={S.purple} />, label: nbMandats + " mandat" + (nbMandats !== 1 ? "s" : ""), color: S.purple, tab: "timeline", subFilter: "mandat", title: "Mandats" },
               fortune ? { icon: <IconCoffre size={16} color={S.gold} />, label: fmtCompact(fortune) + " \u20ac", color: S.gold, tab: "patrimoine", title: "Fortune" } : null,
               salaire ? { icon: <IconCoffre size={16} color={S.green} />, label: new Intl.NumberFormat("fr-FR").format(salaire) + " \u20ac/mois", color: S.green, tab: "patrimoine", title: "Salaire" } : null,
             ].filter(Boolean).filter(c => c.label);
@@ -769,7 +772,11 @@ const EluProfile = () => {
             return (
               <div className="elu-ministats" style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 12 }}>
                 {chips.map((c, i) => (
-                  <div key={i} onClick={() => { setActiveTab(c.tab); setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }} title={c.title} style={{
+                  <div key={i} onClick={() => {
+                    setActiveTab(c.tab);
+                    if (c.tab === "timeline") setTimelineFilter(c.subFilter || "all");
+                    setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                  }} title={c.title} style={{
                     display: "flex", alignItems: "center", gap: 6,
                     background: "rgba(255,255,255,0.04)", border: `1px solid ${c.color}33`,
                     borderRadius: 12, padding: "6px 12px", cursor: "pointer",
@@ -830,7 +837,7 @@ const EluProfile = () => {
       </div>
 
       <div key={activeTab} style={{ animation: "fadeIn 0.25s ease" }}>
-        {activeTab === "timeline" && <TimelineTab elu={elu} />}
+        {activeTab === "timeline" && <TimelineTab elu={elu} initialFilter={timelineFilter} />}
         {activeTab === "bilan" && <BilanFactuel elu={elu} />}
         {activeTab === "votes" && (() => {
           const votes = elu.votes || [];
