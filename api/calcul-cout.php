@@ -117,6 +117,17 @@ function grilleMensuelle(string $cle, int $annee, int $mois, float $tauxBase): f
             if ($ym >= 2017 * 12 + 1) return round($tauxBase * 0.920);
             return round($tauxBase * 0.647);
 
+        // ── Indemnités de fonction Bureau (AN / Sénat) ─────────────────────────
+        // Pas d'historique fin disponible publiquement → application du taux 2024 sur
+        // toute la période. Approximation acceptable car peu d'évolution entre 2017 et 2024.
+        case 'fct_president_an':
+        case 'fct_president_senat':
+        case 'fct_vp_an':
+        case 'fct_vp_senat':
+        case 'fct_questeur_an':
+        case 'fct_questeur_senat':
+            return $tauxBase;
+
         default:
             return $tauxBase;
     }
@@ -134,6 +145,12 @@ function calculerCoutCarriere(array $mandats, ?float $salaire_brut_maire = null,
         'conseiller_arrondissement'  => 228,   'conseiller_metropolitain' => 246, 'conseiller_communautaire' => 246,
         'conseiller_paris'           => 2510,  'conseiller_fde' => 810,
         'membre_conseil_constitutionnel' => 13872,
+        // Indemnités de fonction Bureau AN/Sénat (s'ajoutent à l'indemnité parlementaire de base)
+        // Sources : assemblee-nationale.fr/dyn/synthese/deputes-groupes-parlementaires/la-situation-materielle-du-depute
+        //          senat.fr/connaitre-le-senat/role-et-fonctionnement/lindemnite-parlementaire.html
+        'fct_president_an'           => 7698.50,  'fct_president_senat' => 7591.58,
+        'fct_vp_an'                  => 1099.79,  'fct_vp_senat'        => 2184.30,
+        'fct_questeur_an'            => 5300.36,  'fct_questeur_senat'  => 4444.97,
     ];
 
     $PLAFOND_LOCAL = 8897.93;
@@ -161,11 +178,14 @@ function calculerCoutCarriere(array $mandats, ?float $salaire_brut_maire = null,
         if (str_contains($t, 'ministre')) return 'ministre';
         if (str_contains($t, 'député européen') || str_contains($t, 'parlement européen')) return 'depute_europeen';
         if (str_contains($t, 'européen') && !str_contains($t, 'métropol')) return 'depute_europeen';
-        // Présidences des chambres (même indemnité que parlementaire de base)
-        if (str_contains($t, 'président') && str_contains($t, 'sénat')) return 'senateur';
-        if (str_contains($t, 'président') && str_contains($t, 'assemblée nationale')) return 'depute';
-        if (str_contains($t, 'vice-président') && str_contains($t, 'assemblée nationale')) return 'depute';
-        if (str_contains($t, 'questeur') && str_contains($t, 'sénat')) return 'senateur';
+        // Fonctions parlementaires (Bureau) : s'ajoutent à l'indemnité de base sans la remplacer.
+        // Le mandat parlementaire (Député/Sénateur) coexiste dans mandats[], il est mappé séparément.
+        if (str_contains($t, 'questeur') && str_contains($t, 'sénat'))      return 'fct_questeur_senat';
+        if (str_contains($t, 'questeur') && str_contains($t, 'assemblée'))  return 'fct_questeur_an';
+        if (str_contains($t, 'vice-président') && str_contains($t, 'sénat'))               return 'fct_vp_senat';
+        if (str_contains($t, 'vice-président') && str_contains($t, 'assemblée nationale')) return 'fct_vp_an';
+        if (str_contains($t, 'président') && str_contains($t, 'sénat'))                    return 'fct_president_senat';
+        if (str_contains($t, 'président') && str_contains($t, 'assemblée nationale'))      return 'fct_president_an';
         if (str_contains($t, 'député')) return 'depute';
         if (str_contains($t, 'sénateur') || str_contains($t, 'sénatrice') || str_contains($t, 'sénateur')) return 'senateur';
         if (str_contains($t, 'conseil constitutionnel')) return 'membre_conseil_constitutionnel';
@@ -190,6 +210,7 @@ function calculerCoutCarriere(array $mandats, ?float $salaire_brut_maire = null,
 
     $estExecutif = fn($c) => in_array($c, ['president_republique','premier_ministre','ministre','garde_des_sceaux','secretaire_etat']);
     $estParlementaire = fn($c) => in_array($c, ['depute','senateur','depute_europeen','membre_conseil_constitutionnel']);
+    $estFonctionParlementaire = fn($c) => str_starts_with($c, 'fct_');
 
     // Préparer les mandats
     $mandatsNorm = [];
@@ -267,15 +288,20 @@ function calculerCoutCarriere(array $mandats, ?float $salaire_brut_maire = null,
         foreach ($actifs as $m) { if ($m['cle'] === 'maire') { $aMaire = true; break; } }
         if ($aMaire) $actifs = array_values(array_filter($actifs, fn($m) => $m['cle'] !== 'conseiller_municipal'));
 
-        // Séparer parlementaires (hors plafond) et locaux (soumis au plafond)
-        $parlementaires = []; $locaux = [];
+        // Séparer en 3 catégories :
+        //   - parlementaires (hors plafond local)
+        //   - fonctions parlementaires Bureau (s'ajoutent au mandat de base, sans plafond)
+        //   - locaux (soumis au plafond cumul local)
+        $parlementaires = []; $fcts = []; $locaux = [];
         foreach ($actifs as $m) {
-            if ($estParlementaire($m['cle'])) $parlementaires[] = $m;
-            else $locaux[] = $m;
+            if ($estParlementaire($m['cle']))                $parlementaires[] = $m;
+            elseif ($estFonctionParlementaire($m['cle']))    $fcts[] = $m;
+            else                                             $locaux[] = $m;
         }
 
         $brutLocaux = array_sum(array_map(fn($m) => $m['indemnite'], $locaux));
         $brutParlem = array_sum(array_map(fn($m) => $m['indemnite'], $parlementaires));
+        $brutFcts   = array_sum(array_map(fn($m) => $m['indemnite'], $fcts));
 
         // Si parlementaire national (député/sénateur) + locaux : plafond local = 2 965,98€ (0,5 × IPB)
         // Si seulement locaux : plafond = 8 897,93€
@@ -287,7 +313,7 @@ function calculerCoutCarriere(array $mandats, ?float $salaire_brut_maire = null,
         $plafondLocal = $hasNational ? 2965.98 : $PLAFOND_LOCAL;
         $ecreteLocaux = min($brutLocaux, $plafondLocal);
 
-        $coutMois = $ecreteLocaux + $brutParlem;
+        $coutMois = $ecreteLocaux + $brutParlem + $brutFcts;
         $totalCout += $coutMois;
 
         // Détail locaux (répartition proportionnelle écrêtement)
@@ -299,6 +325,13 @@ function calculerCoutCarriere(array $mandats, ?float $salaire_brut_maire = null,
             $detailType[$c]['reel'] += ($brutLocaux > 0) ? ($m['indemnite'] / $brutLocaux) * $ecreteLocaux : 0;
         }
         foreach ($parlementaires as $m) {
+            $c = $m['cle'];
+            $detailType[$c] = ($detailType[$c] ?? ['mois'=>0,'brut'=>0,'reel'=>0]);
+            $detailType[$c]['mois']++;
+            $detailType[$c]['brut'] += $m['indemnite'];
+            $detailType[$c]['reel'] += $m['indemnite'];
+        }
+        foreach ($fcts as $m) {
             $c = $m['cle'];
             $detailType[$c] = ($detailType[$c] ?? ['mois'=>0,'brut'=>0,'reel'=>0]);
             $detailType[$c]['mois']++;
