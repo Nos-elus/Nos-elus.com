@@ -227,11 +227,11 @@ const getResultMessage = (total) => {
 const mapDefaultSearch = (s) => {
   if (!s) return "";
   const v = s.toLowerCase();
-  if (v === "député") return "Député";
+  if (v === "député") return "Député AN";
   if (v === "sénateur") return "Sénateur";
   if (v === "maire") return "Maire";
   if (v === "ministre") return "Ministre";
-  if (v.includes("europ")) return "Européen";
+  if (v.includes("europ")) return "Eurodéputé";
   if (v.includes("région") || v === "régional") return "Conseiller régional";
   if (v.includes("départ") || v === "départemental") return "Conseiller départemental";
   return "";
@@ -360,7 +360,7 @@ const MatchMaker = () => {
           {/* Poste — remonté en premier filtre */}
           <FilterCard icon="🏛️" title="Type de poste" humor={humors.poste} active={!!poste}>
             <StyledSelect value={poste} onChange={setPoste} options={[
-              "Député", "Sénateur", "Maire", "Ministre", "Européen",
+              "Député AN", "Sénateur", "Eurodéputé", "Maire", "Ministre",
               "Conseiller régional", "Conseiller départemental",
             ]} placeholder="Tous les postes" />
           </FilterCard>

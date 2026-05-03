@@ -25,7 +25,8 @@ $limit       = min(60, max(10, getIntParam('limit', 30)));
 $offset      = ($page - 1) * $limit;
 
 // ── Construction requête ──
-$where  = [];
+// Filtre par défaut : élus en exercice. Ajout ?include_anciens=1 pour aussi inclure les anciens.
+$where  = isset($_GET['include_anciens']) ? [] : ['actif = 1'];
 $binds  = [];
 $having = [];
 
@@ -149,15 +150,30 @@ if ($photo === 'oui') {
 
 // Poste
 if ($poste) {
-    $posteMap = [
-        'Député' => '%éputé%', 'Sénateur' => '%énateur%', 'Maire' => 'Maire%',
-        'Ministre' => '%inistre%', 'Européen' => '%uropéen%',
-        'Conseiller régional' => '%conseill%région%', 'Conseiller départemental' => '%conseill%départem%',
-        'Adjoint' => 'Adjoint%',
+    // Pour les postes mappés au type_mandat → utiliser type_mandat (matching précis).
+    // Accepte les anciens libellés (Député, Européen) ET les nouveaux (Député AN, Eurodéputé) pour rétro-compat.
+    $typeMandatMap = [
+        'Député AN'  => 'depute',
+        'Député'     => 'depute',
+        'Sénateur'   => 'senateur',
+        'Eurodéputé' => 'europeen',
+        'Européen'   => 'europeen',
+        'Maire'      => 'maire',
+        'Ministre'   => 'ministre',
     ];
-    $pattern = $posteMap[$poste] ?? "%$poste%";
-    $where[] = "fonction LIKE :poste";
-    $binds[':poste'] = $pattern;
+    if (isset($typeMandatMap[$poste])) {
+        $where[] = "type_mandat = :poste";
+        $binds[':poste'] = $typeMandatMap[$poste];
+    } else {
+        $posteMap = [
+            'Conseiller régional'    => '%conseill%région%',
+            'Conseiller départemental' => '%conseill%départem%',
+            'Adjoint'                => 'Adjoint%',
+        ];
+        $pattern = $posteMap[$poste] ?? "%$poste%";
+        $where[] = "fonction LIKE :poste";
+        $binds[':poste'] = $pattern;
+    }
 }
 
 // Salaire = indemnités publiques uniquement (grille légale, pas les revenus privés)

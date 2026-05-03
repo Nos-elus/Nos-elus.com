@@ -39,7 +39,9 @@ const TopElus = () => {
         onClick={() => navigate(`/elu/${elu.slug}`)}
         style={{
           flex: 1, display: "flex", alignItems: "center", cursor: "pointer",
-          flexDirection: isLeft ? "row" : "row-reverse",
+          // Barre collée au # central : flex-end pour gauche (barre à droite du conteneur),
+          // flex-start pour droite (barre à gauche du conteneur)
+          justifyContent: isLeft ? "flex-end" : "flex-start",
           minHeight: h + 8, transition: "transform 0.15s",
         }}
         onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
