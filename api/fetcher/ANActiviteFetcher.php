@@ -91,8 +91,8 @@ class ANActiviteFetcher
      */
     public function importCommissions(string $reunionsDir): void
     {
-        $files = glob($reunionsDir . '/json/reunion/*.json');
-        echo "Calcul presences commissions ($files fichiers)...\n";
+        $files = glob($reunionsDir . '/json/reunion/*.json') ?: [];
+        echo "Calcul presences commissions (" . count($files) . " fichiers)...\n";
         if (empty($files)) { echo "  Aucun fichier\n"; return; }
 
         // Compter présences par député

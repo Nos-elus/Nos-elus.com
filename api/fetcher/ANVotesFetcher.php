@@ -146,7 +146,7 @@ class ANVotesFetcher
      * Importe les scrutins depuis les fichiers JSON.
      * Ne traite que les scrutins postérieurs à $sinceDate (pour l'incrémental).
      */
-    public function importScrutins(?string $sinceDate = null): array
+    public function importScrutins(?string $sinceDate = null, bool $dryRun = false): array
     {
         $jsonDir = $this->tmpDir . '/json';
         if (!is_dir($jsonDir)) {
@@ -155,20 +155,21 @@ class ANVotesFetcher
         }
 
         $files = glob($jsonDir . '/*.json');
-        echo count($files) . " fichiers scrutins a traiter\n";
+        echo count($files) . " fichiers scrutins a traiter" . ($dryRun ? " (DRY-RUN)" : "") . "\n";
 
         if (empty($this->mapping)) {
             $this->loadMapping();
         }
 
-        // Préparer les requêtes
-        $stmtCheck = $this->pdo->prepare("SELECT 1 FROM votes WHERE scrutin_id = :sid AND elu_id = :eid LIMIT 1");
-        $stmtInsert = $this->pdo->prepare("
+        // Préparer les requêtes (l'INSERT n'est exécuté qu'en mode réel)
+        $stmtCheckScrutin = $this->pdo->prepare("SELECT 1 FROM votes WHERE scrutin_id = :sid LIMIT 1");
+        $stmtInsert = $dryRun ? null : $this->pdo->prepare("
             INSERT IGNORE INTO votes (elu_id, sujet, position, date_vote, scrutin_id)
             VALUES (:elu_id, :sujet, :position, :date_vote, :scrutin_id)
         ");
 
         $stats = ['scrutins' => 0, 'votes' => 0, 'skipped' => 0, 'errors' => 0];
+        $sampleNew = []; // pour le rapport dry-run
 
         foreach ($files as $file) {
             $data = @json_decode(file_get_contents($file), true);
@@ -190,6 +191,15 @@ class ANVotesFetcher
             if ($sinceDate && $date && $date < $sinceDate) {
                 $stats['skipped']++;
                 continue;
+            }
+
+            // En dry-run : skipper si scrutin déjà importé (pour ne compter que les nouveautés)
+            if ($dryRun) {
+                $stmtCheckScrutin->execute([':sid' => $uid]);
+                if ($stmtCheckScrutin->fetchColumn()) {
+                    $stats['skipped']++;
+                    continue;
+                }
             }
 
             // Extraire les votes nominatifs
@@ -221,20 +231,33 @@ class ANVotesFetcher
                         $eluId = $this->mapping[$acteurRef] ?? null;
                         if (!$eluId) continue;
 
-                        $stmtInsert->execute([
-                            ':elu_id' => $eluId,
-                            ':sujet' => $titre,
-                            ':position' => $position,
-                            ':date_vote' => $date,
-                            ':scrutin_id' => $uid,
-                        ]);
-                        if ($stmtInsert->rowCount() > 0) $votesInserted++;
+                        if ($dryRun) {
+                            $votesInserted++;
+                        } else {
+                            $stmtInsert->execute([
+                                ':elu_id' => $eluId,
+                                ':sujet' => $titre,
+                                ':position' => $position,
+                                ':date_vote' => $date,
+                                ':scrutin_id' => $uid,
+                            ]);
+                            if ($stmtInsert->rowCount() > 0) $votesInserted++;
+                        }
                     }
                 }
             }
 
-            if ($votesInserted > 0) $stats['scrutins']++;
+            if ($votesInserted > 0) {
+                $stats['scrutins']++;
+                if ($dryRun && count($sampleNew) < 5) {
+                    $sampleNew[] = "  • [{$date}] " . mb_substr($titre, 0, 80) . " ({$votesInserted} votes, {$nbVotants} votants)";
+                }
+            }
             $stats['votes'] += $votesInserted;
+        }
+
+        if ($dryRun && $sampleNew) {
+            echo "Sample des nouveaux scrutins détectés :\n" . implode("\n", $sampleNew) . "\n";
         }
 
         return $stats;

@@ -11,18 +11,28 @@ if (mb_strlen($q) < 2) {
 
 // Normaliser la casse pour clé de cache cohérente
 $q = mb_strtolower(trim($q));
+
+// Détecter les patterns d'injection (anti-amplification de scan vers nosdeputes.fr).
+// Une recherche d'élu ne contient jamais ces caractères ni ces séquences.
+$qLooksSuspicious = (bool) preg_match(
+    '/[\x00-\x1f;=#\\\\<>\[\]\{\}|]|--|\bor\s+\d+\s*=\s*\d+|\band\s+\d+\s*=\s*\d+/i',
+    $q
+);
+
+// Strip des caractères qui n'appartiennent jamais à un nom/fonction
+$q = preg_replace('/[\x00-\x1f;=#\\\\<>\[\]\{\}|]/u', '', $q);
 // Échapper les opérateurs MySQL FULLTEXT BOOLEAN MODE (sinon erreur SQL)
 $q = preg_replace('/[+\-><()~*"@]/', ' ', $q);
 $q = trim(preg_replace('/\s+/', ' ', $q));
 if ($q === '') { jsonResponse([]); }
 
 // Cache : résultats de recherche (TTL court)
-$data = cachedResponse('search', ['q' => $q], CACHE_TTL_SEARCH, function() use ($pdo, $q) {
+$data = cachedResponse('search', ['q' => $q], CACHE_TTL_SEARCH, function() use ($pdo, $q, $qLooksSuspicious) {
     // Chercher en local (FULLTEXT + LIKE fallback) — retour immédiat
     $results = searchLocal($pdo, $q);
 
-    // Fetch externe UNIQUEMENT si 0 résultat (pas 3 — évite les 10s de latence)
-    if (count($results) === 0) {
+    // Fetch externe UNIQUEMENT si 0 résultat ET query non suspecte (anti-amplification)
+    if (count($results) === 0 && !$qLooksSuspicious) {
         require_once __DIR__ . '/fetcher/DataFetcher.php';
         $fetcher = new DataFetcher($pdo);
         $newIds = $fetcher->search($q);

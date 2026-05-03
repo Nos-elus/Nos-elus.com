@@ -2,8 +2,10 @@
 /**
  * Cron quotidien — Import votes nominatifs Assemblée Nationale.
  *
- * Usage CLI : php cron-votes-an.php [--full]
- *   --full : réimporte tous les scrutins (sinon incrémental depuis dernier import)
+ * Usage CLI : php cron-votes-an.php [--full] [--dry-run]
+ *   --full    : réimporte tous les scrutins (sinon incrémental depuis dernier import)
+ *   --dry-run : ne fait AUCUN INSERT/UPDATE, ne purge pas le cache, ne recalcule pas
+ *               l'activité parlementaire. Affiche juste le diff (combien serait importé).
  *
  * Cron : 0 5 * * * php cron-votes-an.php
  */
@@ -20,10 +22,11 @@ if (php_sapi_name() !== 'cli' && ($_SERVER['REMOTE_ADDR'] ?? '') !== '127.0.0.1'
 }
 require_once __DIR__ . '/fetcher/ANVotesFetcher.php';
 
-$full = in_array('--full', $argv ?? []);
+$full   = in_array('--full', $argv ?? []);
+$dryRun = in_array('--dry-run', $argv ?? []);
 
 echo "=== IMPORT VOTES AN — " . date('Y-m-d H:i:s') . " ===\n";
-echo "Mode: " . ($full ? 'FULL' : 'INCREMENTAL') . "\n\n";
+echo "Mode: " . ($full ? 'FULL' : 'INCREMENTAL') . ($dryRun ? ' [DRY-RUN]' : '') . "\n\n";
 
 $fetcher = new ANVotesFetcher($pdo, '/tmp/scrutins_an', 200);
 
@@ -59,18 +62,24 @@ if (!$full) {
     }
 }
 
-// Étape 4 : Importer
+// Étape 4 : Importer (ou simuler en dry-run)
 echo "\n";
-$stats = $fetcher->importScrutins($sinceDate);
+$stats = $fetcher->importScrutins($sinceDate, $dryRun);
 
 $duration = (int) ((microtime(true) - $startTime) * 1000);
 
-echo "\n=== RESULTAT ===\n";
-echo "Scrutins importes: {$stats['scrutins']}\n";
-echo "Votes inseres: {$stats['votes']}\n";
+echo "\n=== RESULTAT" . ($dryRun ? ' (DRY-RUN)' : '') . " ===\n";
+echo ($dryRun ? "Scrutins qui seraient importes: " : "Scrutins importes: ") . $stats['scrutins'] . "\n";
+echo ($dryRun ? "Votes qui seraient inseres: " : "Votes inseres: ") . $stats['votes'] . "\n";
 echo "Scrutins ignores (< 200 votants ou deja importes): {$stats['skipped']}\n";
 echo "Erreurs: " . ($stats['errors'] ?? 0) . "\n";
 echo "Duree: " . round($duration / 1000, 1) . "s\n";
+
+// En dry-run, on s'arrête ici : pas de log, pas de purge cache, pas de recalcul activité
+if ($dryRun) {
+    echo "\n=== DRY-RUN TERMINE — aucune modification BDD ===\n";
+    exit(0);
+}
 
 // Log
 $status = ($stats['errors'] ?? 0) > 0 && $stats['votes'] === 0 ? 'error' : 'success';
