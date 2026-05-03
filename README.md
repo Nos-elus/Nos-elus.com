@@ -95,10 +95,9 @@ Le coût carrière = somme(indemnité × durée de chaque mandat) sur l'historiq
 
 ### Statuts judiciaires
 
-Les affaires sont classées strictement selon la terminologie juridique :
-- **mis_en_examen** : mise en examen prononcée
+Les affaires sont classées strictement selon la terminologie juridique. Valeurs autorisées (ENUM BDD `affaires.statut`) :
 - **en_cours** : procédure en cours, pas de jugement
-- **condamne** : condamnation prononcée (préciser : définitive ou en appel)
+- **condamne** : condamnation prononcée (préciser dans la description : définitive ou en appel)
 - **relaxe** : relaxe prononcée
 - **classe** : classement sans suite
 
@@ -106,13 +105,17 @@ Chaque affaire **doit** avoir une URL source vérifiable. La présomption d'inno
 
 ### Scores affichés
 
-Quatre indicateurs sur 5 :
-- **Intégrité** : pénalisé par les affaires condamnées (pondéré par gravité)
-- **Transparence** : présence des déclarations HATVP, complétude du profil public
-- **Assiduité** : taux d'activité parlementaire (formule ci-dessus, élus locaux : taux de présence aux délibérations si connu)
-- **Cohérence** : analyse des votes vs étiquette politique annoncée
+Cinq indicateurs sont prévus en BDD (`elus.score_*`, échelle 0-10) :
 
-Tous les coefficients sont en clair dans `api/calcul-cout.php` et `api/palmares.php`.
+| Score | État actuel | Détail |
+|---|---|---|
+| **Assiduité** | ✅ Calculé | Taux d'activité parlementaire (formule ci-dessus). Recalculé par `cron-taux-presence.php`. |
+| **Intégrité** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à implémenter (signal envisagé : nombre et gravité d'affaires condamnées). |
+| **Transparence** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à implémenter (signal envisagé : présence d'une déclaration HATVP, complétude du profil). |
+| **Cohérence** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à définir. |
+| **Bilan** | ⏳ Non calculé | Champ présent en BDD, valeur par défaut 5/10. Algorithme à définir. |
+
+Tant qu'un score n'est pas calculé, il reste à 5/10 sur toute la base — il n'est donc **pas pertinent** de l'afficher comme une mesure différenciante. Les classements et palmarès n'utilisent que le score d'assiduité aujourd'hui.
 
 ### Vote citoyen (👍 / 👎)
 
