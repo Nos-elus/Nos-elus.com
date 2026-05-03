@@ -2,6 +2,26 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { S } from "../utils/constants";
 import Avatar from "../components/Avatar";
+import { Pres2027Hero } from "../components/Pres2027Countdown";
+
+// Fetch l'IP publique du client (REMOTE_ADDR non fiable derrière proxy).
+// Cache en module pour ne pas fetch plusieurs fois.
+let _clientIp = null;
+let _clientIpPromise = null;
+async function getClientIp() {
+  if (_clientIp) return _clientIp;
+  if (_clientIpPromise) return _clientIpPromise;
+  _clientIpPromise = (async () => {
+    try {
+      const r = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
+      if (!r.ok) throw new Error("ipify fail");
+      const d = await r.json();
+      if (d.ip) { _clientIp = d.ip; return d.ip; }
+    } catch {}
+    return null;
+  })();
+  return _clientIpPromise;
+}
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
@@ -49,8 +69,9 @@ const Presidentielle2027 = () => {
       .then(d => { if (d.candidats) setCandidats(d.candidats); })
       .catch(() => {});
     fetchResults();
-    // L'API est la source de vérité
-    fetch(`${API}/vote2027.php?check=1`, { credentials: "same-origin" })
+    // L'API est la source de vérité (vérifie via IP hashée)
+    getClientIp().then(ip => {
+    fetch(`${API}/vote2027.php?check=1${ip ? `&ip=${encodeURIComponent(ip)}` : ""}`, { credentials: "same-origin" })
       .then(r => {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
@@ -72,6 +93,7 @@ const Presidentielle2027 = () => {
           setVoted(true);
         }
       });
+    });
   }, [fetchResults]);
 
   const toggleCandidat = (id) => {
@@ -87,10 +109,11 @@ const Presidentielle2027 = () => {
     if (ranking.length !== candidats.length || sending) return;
     setSending(true);
     try {
+      const ip = await getClientIp();
       const res = await fetch(`${API}/vote2027.php`, {
         method: "POST", credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classement: ranking, change: isChanging }),
+        body: JSON.stringify({ classement: ranking, change: isChanging, ip }),
       });
       if (res.ok) {
         setVoted(true);
@@ -133,21 +156,7 @@ const Presidentielle2027 = () => {
           background: `radial-gradient(circle, ${S.gold}08 0%, transparent 70%)`,
           pointerEvents: "none",
         }} />
-        <div style={{
-          fontFamily: S.fontTitle, fontSize: "clamp(14px,2.5vw,18px)", color: S.textDim,
-          letterSpacing: 6, textTransform: "uppercase", marginBottom: 4,
-        }}>Grand Prix</div>
-        <div style={{
-          fontFamily: S.fontTitle, fontSize: "clamp(52px,10vw,90px)", color: S.gold,
-          lineHeight: 0.95, letterSpacing: 4,
-          textShadow: `0 0 40px ${S.gold}66, 0 0 80px ${S.gold}25`,
-          background: `linear-gradient(180deg, ${S.gold}, #e17a2d)`,
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>2027</div>
-        <div style={{
-          fontFamily: S.fontTitle, fontSize: "clamp(16px,3vw,24px)", color: S.textMain,
-          marginTop: 8, letterSpacing: 3,
-        }}>Presidentielle</div>
+        <Pres2027Hero />
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 12,
         }}>

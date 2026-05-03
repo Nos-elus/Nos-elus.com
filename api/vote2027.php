@@ -1,10 +1,14 @@
 <?php
 /**
- * Vote Presidentielle 2027 — Vote Unique Transferable (simplifie)
- * GET  ?candidats=1 : liste des candidats depuis candidats_2027.json
- * GET  ?check=1     : classement du votant courant
- * GET  (defaut)     : resultats agreges (score VUT)
- * POST : soumettre un classement (tout sous-ensemble valide)
+ * Vote Présidentielle 2027 — Vote Unique Transférable
+ * Anti-revote : hash(IP + sel) en BDD (table votes_2027). IP fournie par client
+ * (REMOTE_ADDR cassé par proxy = loopback). Aucune IP en clair stockée.
+ *
+ * GET  ?candidats=1     : liste candidats (candidats_2027.json)
+ * GET  ?check=1&ip=...  : classement du votant courant
+ * GET  (défaut)         : résultats agrégés (score VUT)
+ * POST {classement, ip, change?}  : soumettre un classement
+ * DELETE {ip}           : retirer son vote
  */
 
 require_once __DIR__ . '/config.php';
@@ -16,7 +20,6 @@ header('Expires: 0');
 
 checkRateLimit(30, 60);
 
-const VOTES_FILE    = __DIR__ . '/cache/data/votes_2027.json';
 const CANDIDATS_FILE = __DIR__ . '/candidats_2027.json';
 
 function loadCandidats(): array {
@@ -30,182 +33,136 @@ function getCandidatIds(): array {
     return array_column(loadCandidats(), 'id');
 }
 
-// ── Helpers ──
-
-function withVotesLock(callable $callback): mixed {
-    $dir = dirname(VOTES_FILE);
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0755, true);
+/** Hash IP sécurisé. Aucune IP en clair stockée nulle part. */
+function ipHash(?array $body = null): ?string {
+    $salt = getenv('NOSELUS_VOTE2027_SALT') ?: '';
+    $ip = null;
+    if (is_array($body) && !empty($body['ip']) && filter_var($body['ip'], FILTER_VALIDATE_IP)) {
+        $ip = $body['ip'];
+    } elseif (!empty($_GET['ip']) && filter_var($_GET['ip'], FILTER_VALIDATE_IP)) {
+        $ip = $_GET['ip'];
     }
-    $fp = fopen(VOTES_FILE, 'c+');
-    if (!$fp || !flock($fp, LOCK_EX)) {
-        return null;
+    // Fallback REMOTE_ADDR (non fiable derrière proxy, mais conserve compat)
+    if (!$ip) {
+        $ra = $_SERVER['REMOTE_ADDR'] ?? null;
+        if ($ra && filter_var($ra, FILTER_VALIDATE_IP)) $ip = $ra;
     }
-    $raw = stream_get_contents($fp);
-    $data = $raw ? json_decode($raw, true) : null;
-    if (!$data) $data = ['votes' => [], 'updated' => date('c')];
-
-    $result = $callback($data);
-
-    if ($result !== null) {
-        $data['updated'] = date('c');
-        ftruncate($fp, 0);
-        rewind($fp);
-        fwrite($fp, json_encode($data, JSON_UNESCAPED_UNICODE));
-    }
-
-    flock($fp, LOCK_UN);
-    fclose($fp);
-    return $result;
+    if (!$ip) return null;
+    return hash('sha256', $ip . $salt);
 }
 
-function ipHash(): string {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    return hash('sha256', $ip . (getenv('NOSELUS_VOTE2027_SALT') ?: ''));
-}
-
-// ── GET ?candidats=1 : liste des candidats depuis JSON ──
-
+// ── GET ?candidats=1 ──
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['candidats'])) {
     jsonResponse(['candidats' => loadCandidats()]);
 }
 
-// ── GET : resultats agreges ──
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $hash     = ipHash();
-    $validIds = getCandidatIds();
-
-    $response = withVotesLock(function (&$data) use ($hash, $validIds) {
-        if (isset($_GET['check'])) {
-            $hasVoted  = isset($data['votes'][$hash]);
-            $classement = $hasVoted ? $data['votes'][$hash] : null;
-            jsonResponse(['voted' => $hasVoted, 'classement' => $classement]);
-        }
-
-        $votes   = $data['votes'];
-        $scores  = [];
-        $premiers = [];
-
-        foreach ($votes as $classement) {
-            if (!is_array($classement) || empty($classement)) continue;
-            $n = count($classement);
-            foreach ($classement as $rang => $candidat) {
-                // Ignorer les anciens candidats retirés du JSON
-                if (!in_array($candidat, $validIds, true)) continue;
-                if (!isset($scores[$candidat])) {
-                    $scores[$candidat]  = 0;
-                    $premiers[$candidat] = 0;
-                }
-                // Points décroissants basés sur la longueur propre du vote
-                $scores[$candidat] += ($n - $rang);
-                if ($rang === 0) $premiers[$candidat]++;
-            }
-        }
-
-        arsort($scores);
-
-        $resultats = [];
-        foreach ($scores as $id => $score) {
-            $resultats[] = [
-                'id'              => $id,
-                'score'           => $score,
-                'nb_votes_premier' => $premiers[$id] ?? 0,
-            ];
-        }
-
-        jsonResponse([
-            'resultats'    => $resultats,
-            'total_votes'  => count($votes),
-            'updated'      => $data['updated'],
-        ]);
-
-        return null;
-    });
-
-    if ($response === null) {
-        jsonResponse(['error' => 'Erreur de lecture des votes.'], 500);
+// ── GET ?check=1 : a-t-il déjà voté ? ──
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['check'])) {
+    $hash = ipHash();
+    if (!$hash) jsonResponse(['voted' => false, 'classement' => null]);
+    $stmt = $pdo->prepare("SELECT classement FROM votes_2027 WHERE ip_hash = :h LIMIT 1");
+    $stmt->execute([':h' => $hash]);
+    $row = $stmt->fetch();
+    if ($row) {
+        $cl = json_decode($row['classement'], true);
+        jsonResponse(['voted' => true, 'classement' => is_array($cl) ? $cl : null]);
     }
+    jsonResponse(['voted' => false, 'classement' => null]);
+}
+
+// ── GET (défaut) : résultats agrégés ──
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $validIds = getCandidatIds();
+    $rows = $pdo->query("SELECT classement, updated_at FROM votes_2027")->fetchAll();
+    $scores = []; $premiers = []; $updated = null;
+    foreach ($rows as $r) {
+        if (!$updated || $r['updated_at'] > $updated) $updated = $r['updated_at'];
+        $classement = json_decode($r['classement'], true);
+        if (!is_array($classement) || empty($classement)) continue;
+        $n = count($classement);
+        foreach ($classement as $rang => $candidat) {
+            if (!in_array($candidat, $validIds, true)) continue;
+            if (!isset($scores[$candidat])) { $scores[$candidat] = 0; $premiers[$candidat] = 0; }
+            $scores[$candidat] += ($n - $rang);
+            if ($rang === 0) $premiers[$candidat]++;
+        }
+    }
+    arsort($scores);
+    $resultats = [];
+    foreach ($scores as $id => $score) {
+        $resultats[] = ['id' => $id, 'score' => $score, 'nb_votes_premier' => $premiers[$id] ?? 0];
+    }
+    jsonResponse([
+        'resultats'   => $resultats,
+        'total_votes' => count($rows),
+        'updated'     => $updated ?: date('c'),
+    ]);
 }
 
 // ── POST : soumettre un vote ──
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
-
     if (!$input || !isset($input['classement']) || !is_array($input['classement'])) {
-        jsonResponse(['error' => 'Format invalide. Envoyez { "classement": ["id1", "id2", ...] }'], 400);
+        jsonResponse(['error' => 'Format invalide. Envoyez { "classement": ["id1", ...], "ip": "x.x.x.x" }'], 400);
+    }
+
+    // Anti-CSRF
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    $origin  = $_SERVER['HTTP_ORIGIN']  ?? '';
+    $csrfOk = preg_match('#^https?://(www\.)?nos-elus\.com(/|$)#', $origin)
+           || preg_match('#^https?://(www\.)?nos-elus\.com(/|$)#', $referer)
+           || preg_match('#^http://localhost:(5173|3000)(/|$)#', $referer);
+    if (!$csrfOk) {
+        jsonResponse(['error' => 'Origin/Referer invalide.'], 403);
     }
 
     $classement = $input['classement'];
     $validIds   = getCandidatIds();
 
-    if (empty($classement)) {
-        jsonResponse(['error' => 'Le classement ne peut pas etre vide.'], 400);
-    }
-
-    // Pas de doublons
+    if (empty($classement)) jsonResponse(['error' => 'Le classement ne peut pas être vide.'], 400);
     if (count(array_unique($classement)) !== count($classement)) {
-        jsonResponse(['error' => 'Doublons detectes dans le classement.'], 400);
+        jsonResponse(['error' => 'Doublons détectés dans le classement.'], 400);
     }
-
-    // Tous les IDs doivent être dans le JSON courant
     foreach ($classement as $id) {
         if (!is_string($id) || !in_array($id, $validIds, true)) {
             jsonResponse(['error' => "Candidat invalide : $id"], 400);
         }
     }
 
-    $hash     = ipHash();
+    $hash = ipHash($input);
+    if (!$hash) jsonResponse(['error' => 'IP requise (anti-revote).'], 400);
+
     $isChange = isset($input['change']) && $input['change'] === true;
 
-    if (!$isChange) {
-        if (isset($_COOKIE['noselus_v27'])) {
-            $checkData = json_decode(file_get_contents(VOTES_FILE) ?: '{}', true);
-            if (isset($checkData['votes'][$hash])) {
-                jsonResponse(['error' => 'Vous avez deja vote. Utilisez "Changer d\'avis" pour modifier.'], 409);
-            }
-        }
+    $stmt = $pdo->prepare("SELECT id FROM votes_2027 WHERE ip_hash = :h LIMIT 1");
+    $stmt->execute([':h' => $hash]);
+    $exists = (bool) $stmt->fetchColumn();
+
+    if ($exists && !$isChange) {
+        jsonResponse(['error' => 'Vous avez déjà voté. Utilisez "Changer d\'avis" pour modifier.'], 409);
     }
 
-    $result = withVotesLock(function (&$data) use ($hash, $classement, $isChange) {
-        $exists = isset($data['votes'][$hash]);
-        if ($exists && !$isChange) {
-            jsonResponse(['error' => 'Vous avez deja vote. Utilisez "Changer d\'avis" pour modifier.'], 409);
-        }
-        $data['votes'][$hash] = $classement;
-        return true;
-    });
+    $stmtUp = $pdo->prepare(
+        "INSERT INTO votes_2027 (ip_hash, classement) VALUES (:h, :c)
+         ON DUPLICATE KEY UPDATE classement = VALUES(classement)"
+    );
+    $stmtUp->execute([':h' => $hash, ':c' => json_encode($classement, JSON_UNESCAPED_UNICODE)]);
 
-    if ($result === null) {
-        jsonResponse(['error' => 'Erreur lors de la sauvegarde du vote.'], 500);
-    }
-
-    // Pas de cookie : anti-revote via hash IP côté serveur, synchro UI via localStorage.
     jsonResponse(
-        ['success' => true, 'message' => $isChange ? 'Vote modifie.' : 'Vote enregistre.'],
+        ['success' => true, 'message' => $isChange ? 'Vote modifié.' : 'Vote enregistré.'],
         $isChange ? 200 : 201
     );
 }
 
 // ── DELETE : retirer son vote ──
-
 if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    $hash = ipHash();
-
-    $result = withVotesLock(function (&$data) use ($hash) {
-        if (!isset($data['votes'][$hash])) {
-            jsonResponse(['error' => 'Aucun vote a retirer.'], 404);
-        }
-        unset($data['votes'][$hash]);
-        return true;
-    });
-
-    if ($result === null) {
-        jsonResponse(['error' => 'Erreur lors de la suppression.'], 500);
-    }
-
-    jsonResponse(['success' => true, 'message' => 'Vote retire.']);
+    $input = json_decode(file_get_contents('php://input'), true) ?: null;
+    $hash = ipHash($input);
+    if (!$hash) jsonResponse(['error' => 'IP requise.'], 400);
+    $stmt = $pdo->prepare("DELETE FROM votes_2027 WHERE ip_hash = :h");
+    $stmt->execute([':h' => $hash]);
+    if ($stmt->rowCount() === 0) jsonResponse(['error' => 'Aucun vote à retirer.'], 404);
+    jsonResponse(['success' => true, 'message' => 'Vote retiré.']);
 }
 
-jsonResponse(['error' => 'Methode non supportee.'], 405);
+jsonResponse(['error' => 'Méthode non supportée.'], 405);
