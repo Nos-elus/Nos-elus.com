@@ -80,3 +80,9 @@ tipee-content.md
 photos-traitees/
 Document 1 non enregistré
 *Document*non*enregistré*
+
+# Scripts anti-leak / outils de sécurité — JAMAIS publiés
+scripts/check-no-leak.sh
+scripts/check-*.sh
+scripts/local-*
+

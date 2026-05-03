@@ -27,13 +27,13 @@ if ($voteRateData['count'] > 10) {
     echo json_encode(['error' => 'Trop de votes. Réessayez dans 1 minute.']);
     exit;
 }
-$allowedOrigins = ['https://nos-elus.fr', 'https://www.nos-elus.fr', 'http://localhost:5173', 'http://localhost:3000'];
+$allowedOrigins = ['https://nos-elus.com', 'https://www.nos-elus.com', 'http://localhost:5173', 'http://localhost:3000'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowedOrigins, true)) {
     header('Access-Control-Allow-Origin: ' . $origin);
     header('Vary: Origin');
 } else {
-    header('Access-Control-Allow-Origin: https://nos-elus.fr');
+    header('Access-Control-Allow-Origin: https://nos-elus.com');
 }
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -54,9 +54,21 @@ if (!is_dir($VOTES_DIR)) {
 }
 
 // ── Helpers ──
-function getIpHash(): string {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    return hash('sha256', $ip . (getenv('NOSELUS_VOTE_SALT') ?: ''));
+function voterUidFromRequest(?array $body = null): ?string {
+    $u = null;
+    if (is_array($body) && isset($body['uid'])) $u = $body['uid'];
+    if (!$u && isset($_GET['uid'])) $u = $_GET['uid'];
+    if (!is_string($u)) return null;
+    $u = trim($u);
+    if (strlen($u) < 8 || strlen($u) > 64 || !preg_match('/^[A-Za-z0-9_\-]+$/', $u)) return null;
+    return $u;
+}
+
+function getVoterHash(?array $body = null): string {
+    $salt = getenv('NOSELUS_VOTE_SALT') ?: '';
+    $uid = voterUidFromRequest($body);
+    if ($uid) return hash('sha256', 'uid:' . $uid . $salt);
+    return hash('sha256', 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0') . $salt);
 }
 
 function withVotesLock(string $file, callable $callback): mixed {
@@ -108,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 
-    $ipHash = getIpHash();
+    $ipHash = getVoterHash();
     $key = voteKey($ipHash, $eluId);
 
     $response = withVotesLock($VOTES_FILE, function (&$votes) use ($eluId, $key) {
@@ -132,6 +144,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 // ── POST ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Anti-CSRF : Origin ou Referer doit matcher nos-elus.com
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    $csrfOk = in_array($origin, $allowedOrigins, true)
+        || ($referer && preg_match('#^https?://(www\.)?nos-elus\.com(/|$)#', $referer))
+        || ($referer && preg_match('#^http://localhost:(5173|3000)(/|$)#', $referer));
+    if (!$csrfOk) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Origin/Referer invalide']);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     $eluId = intval($input['elu_id'] ?? 0);
     $vote = intval($input['vote'] ?? 0);
@@ -142,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $ipHash = getIpHash();
+    $ipHash = getVoterHash($input);
     $key = voteKey($ipHash, $eluId);
 
     // Cookie anti-revote par élu : vérifier avant le lock

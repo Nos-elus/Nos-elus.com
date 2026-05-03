@@ -1,8 +1,5 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { S } from "../utils/constants";
-
-const API = import.meta.env.VITE_API_URL || "/api";
 
 const LINKS = [
   { label: "CGU", to: "/cgu" },
@@ -15,18 +12,6 @@ const LINKS = [
 ];
 
 export default function Footer() {
-  const [visitors, setVisitors] = useState(null);
-
-  useEffect(() => {
-    // Enregistrer la visite + récupérer le total
-    fetch(`${API}/visit.php`, { method: "POST", credentials: "same-origin" })
-      .then(r => r.json())
-      .then(d => setVisitors(d.total))
-      .catch(() => {
-        fetch(`${API}/visit.php`, { credentials: "same-origin" }).then(r => r.json()).then(d => setVisitors(d.total)).catch(() => {});
-      });
-  }, []);
-
   return (
     <footer style={{
       marginTop: 80,
@@ -73,11 +58,6 @@ export default function Footer() {
       <div style={{ textAlign: "center", marginBottom: 12 }}>
         <img src="/Fabrique_en_france.svg" alt="Fabriqué en France" style={{ height: 36, opacity: 0.8 }} />
       </div>
-      {visitors > 0 && (
-        <p style={{ textAlign: "center", fontSize: 12, color: S.textMuted, margin: "0 0 8px", letterSpacing: "0.03em" }}>
-          <span style={{ color: S.gold, fontWeight: 800 }}>{new Intl.NumberFormat("fr-FR").format(visitors)}</span> visiteurs uniques
-        </p>
-      )}
       <p style={{ textAlign: "center", fontSize: 11, color: S.textDim, margin: 0, letterSpacing: "0.05em" }}>
         nos-elus.com &mdash; MVP 2026 &mdash; Données issues de sources publiques 🍩
       </p>

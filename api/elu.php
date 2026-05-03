@@ -553,26 +553,33 @@ $data = cachedResponse('elu', ['id' => $id], CACHE_TTL_MEDIUM, function() use ($
         || (str_contains($fonction, 'président') && (str_contains($fonction, 'région') || str_contains($fonction, 'département')))
         || str_contains($typeMandat, 'maire');
 
-    if ($isNational) {
+    // Seuls ministres + président ont leur déclaration de patrimoine publiée intégralement en ligne sur hatvp.fr.
+    // Pour parlementaires et élus locaux soumis, la fiche HATVP existe mais le document n'est consultable qu'en préfecture (art. LO135-2).
+    $isMinistre = (str_contains($fonction, 'ministre') && !str_contains($fonction, 'ancien'))
+        || str_contains($fonction, 'président de la république');
+
+    $hatvpFicheUrl = !empty($elu['url_hatvp']) ? 'https://www.hatvp.fr' . $elu['url_hatvp'] : null;
+    $dept = $elu['departement'] ?? '';
+    $prefInfo = $PREFECTURES[$dept] ?? null;
+    $prefNom  = $prefInfo ? 'Préfecture de ' . $prefInfo[0] : null;
+    $prefVille = $prefInfo ? $prefInfo[1] : null;
+
+    if ($isMinistre) {
         $elu['patrimoine_warning'] = [
             'consultable' => true,
-            'url' => 'https://www.hatvp.fr/consulter-les-declarations/',
-            'message' => 'Déclaration consultable sur hatvp.fr',
+            'url' => $hatvpFicheUrl ?: 'https://www.hatvp.fr/consulter-les-declarations/',
+            'message' => 'Déclaration consultable en ligne sur HATVP',
             'warning' => false,
-            'note_tardivite' => 'La HATVP peut mettre plusieurs mois avant de publier une déclaration. La transparence prend du temps.',
         ];
-    } elseif ($isLocalSoumis) {
-        $dept = $elu['departement'] ?? '';
-        $prefInfo = $PREFECTURES[$dept] ?? null;
-        $prefNom  = $prefInfo ? 'Préfecture de ' . $prefInfo[0] : null;
-        $prefVille = $prefInfo ? $prefInfo[1] : null;
+    } elseif ($isNational || $isLocalSoumis) {
         $elu['patrimoine_warning'] = [
             'consultable'      => false,
-            'url'              => null,
+            'url'              => $hatvpFicheUrl,
             'message'          => 'Consultable en préfecture uniquement',
             'warning'          => true,
             'prefecture_nom'   => $prefNom,
             'prefecture_ville' => $prefVille,
+            'note_absurdite'   => 'Document consultable physiquement par tout citoyen, mais sa diffusion publique est punie de 45 000 € d\'amende (art. LO135-2 Code électoral).',
         ];
     } else {
         $elu['patrimoine_warning'] = [

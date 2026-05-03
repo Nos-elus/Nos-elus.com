@@ -5,6 +5,7 @@ import { useSearch, prefetchElu } from "../hooks/useApi";
 import { ELUS } from "../data/elus";
 import Avatar from "./Avatar";
 import Dice3D from "./Dice3D";
+import { Pres2027Pill } from "./Pres2027Countdown";
 
 const slugify = (text) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const norm = (text) => (text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -34,6 +35,9 @@ const Navbar = () => {
   const searchRef = useRef(null);
   const searchRefMobile = useRef(null);
   const drawerRef = useRef(null);
+  const hamburgerBtnRef = useRef(null);
+  const closeBtnRef = useRef(null);
+  const wasOpenRef = useRef(false);
   const [soutenirMsg] = useState(() => SOUTENIR_MESSAGES[Math.floor(Math.random() * SOUTENIR_MESSAGES.length)]);
 
   const { results: apiResults, loading: searchLoading } = useSearch(query);
@@ -72,6 +76,30 @@ const Navbar = () => {
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    closeBtnRef.current?.focus();
+    const handleKey = (e) => {
+      if (e.key === "Escape") { setMenuOpen(false); return; }
+      if (e.key !== "Tab" || !drawerRef.current) return;
+      const focusables = drawerRef.current.querySelectorAll(
+        'a[href], button, input, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (wasOpenRef.current && !menuOpen) hamburgerBtnRef.current?.focus();
+    wasOpenRef.current = menuOpen;
   }, [menuOpen]);
 
   const handleSelect = (elu) => {
@@ -139,6 +167,7 @@ const Navbar = () => {
             <span style={{ fontFamily: S.fontTitle, fontSize: 16, color: S.gold, textShadow: "0 0 8px rgba(253,203,110,0.3)" }}>nos-elus</span>
             <span style={{ fontSize: 9, fontWeight: 800, color: S.textDim }}>.com</span>
           </Link>
+          <Pres2027Pill />
           {!isHome && (
             <span className="nav-label" style={{
               fontFamily: S.font, fontSize: 11, color: S.textDim, fontWeight: 600,
@@ -210,8 +239,11 @@ const Navbar = () => {
         {/* Mobile: hamburger button */}
         <button
           className="nav-hamburger"
+          ref={hamburgerBtnRef}
           onClick={() => setMenuOpen(true)}
-          aria-label="Menu"
+          aria-label="Ouvrir le menu de navigation"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-drawer"
           style={{
             display: "none",
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
@@ -239,6 +271,11 @@ const Navbar = () => {
       {/* Mobile side drawer */}
       <div
         ref={drawerRef}
+        id="mobile-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu de navigation"
+        aria-hidden={!menuOpen}
         style={{
           position: "fixed", top: 0, right: 0, bottom: 0,
           width: "min(85vw, 320px)",
@@ -263,7 +300,9 @@ const Navbar = () => {
             <span style={{ fontSize: 9, fontWeight: 800, color: S.textDim }}>.com</span>
           </Link>
           <button
+            ref={closeBtnRef}
             onClick={() => setMenuOpen(false)}
+            aria-label="Fermer le menu"
             style={{
               background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 8, padding: "8px 12px", cursor: "pointer",

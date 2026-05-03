@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { S } from "../utils/constants";
+import { withCacheBust } from "../utils/cacheBust";
 
 // Génère une URL DiceBear (avatar unique et déterministe par nom)
 const dicebearUrl = (name, size) =>
@@ -31,7 +32,7 @@ const Avatar = ({ elu, size = 64, showBorder = true }) => {
     return (
       <div style={containerStyle}>
         <img
-          src={elu.photo_url}
+          src={withCacheBust(elu.photo_url, elu.updated_at)}
           alt={nom}
           onError={() => setImgError(true)}
           loading="lazy"

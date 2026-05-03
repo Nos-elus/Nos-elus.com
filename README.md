@@ -51,16 +51,32 @@ Voir [`docs/sources-donnees.md`](docs/sources-donnees.md) pour le détail.
 
 ## Formules et méthodes de calcul
 
-### Taux d'activité parlementaire (députés)
+### Taux d'activité parlementaire
 
-Pondération composite officielle :
+Le score d'assiduité (0-10) reflète la **participation aux scrutins publics** de la chambre où siège l'élu, sur les périodes où il était effectivement en fonction.
+
+**Formule (ratio direct, sans pondération arbitraire) :**
 ```
-taux_activite = (votes / total_scrutins) × 50%
-              + (commissions / max_commissions) × 35%
-              + (questions / max_questions) × 15%
+taux_global    = (nb_votes + nb_reunions_present)
+               / (total_scrutins + nb_reunions_convoque) × 100
+score_assiduite = round(taux_global / 10, 1)   # borné [0, 10]
 ```
 
-Source des chiffres : `data.assemblee-nationale.fr` + `nosdeputes.fr/api`. Le diviseur est le maximum constaté sur la législature en cours, recalculé à chaque mise à jour.
+**Périmètre du dénominateur (`total_scrutins`)** :
+- Scrutins publics de la chambre concernée (Assemblée nationale ou Parlement européen)
+- Restreints aux périodes de mandat parlementaire
+- **Moins** les périodes ministérielles concomitantes (le siège est alors occupé par un suppléant, l'élu titulaire ne peut pas voter)
+
+**Sources de données :**
+- Assemblée nationale : `data.assemblee-nationale.fr` (open data des scrutins)
+- Parlement européen : `europarl.europa.eu`
+
+**Limites actuelles :**
+- Sénateurs : pas de source de scrutins exploitée à ce jour → score laissé à la valeur par défaut, non recalculé.
+- Absences justifiées (commission d'enquête, mission temporaire, congé maladie/maternité) : actuellement comptées comme absences. L'API AN les distingue ("Non-votant"), à intégrer dans un prochain import.
+- Présence en commission et questions écrites : colonnes BDD prêtes (`nb_reunions_*`, `nb_questions`) mais pas encore peuplées par un cron dédié. Quand ces données arriveront, la formule du `taux_global` les intégrera automatiquement (ratio direct).
+
+Le calcul est exécuté par `api/cron-taux-presence.php`.
 
 ### Indemnités d'élus (grille 2025)
 

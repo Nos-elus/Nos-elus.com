@@ -3,7 +3,7 @@ export const ELUS = [
   {
     id: 1, nom: "Marine Le Pen", parti: "RN", emoji: "🦅", couleur: "#1a237e",
     alias: ["La Blonde", "MLP", "La Mère Le Pen"],
-    photo_url: "/photos/marine-le-pen.png",
+    photo_url: "/photos/marine-le-pen.webp",
     fonction: "Députée du Pas-de-Calais",
     mandats: ["Députée du Pas-de-Calais (2012-présent)", "Députée européenne (2004-2017)", "Conseillère régionale Nord-Pas-de-Calais (1998-2004)", "Conseillère régionale Hauts-de-France (2015-2017)"],
     affaires: [
@@ -69,7 +69,7 @@ export const ELUS = [
   {
     id: 3, nom: "François Hollande", parti: "PS", emoji: "🌹", couleur: "#e91e63",
     alias: ["Flamby", "Pépère", "Monsieur Normal"],
-    photo_url: "/photos/francois-hollande.png",
+    photo_url: "/photos/francois-hollande.webp",
     fonction: "Ancien Président / Député",
     mandats: ["Président de la République (2012-2017)", "Député de Corrèze (1997-2012)", "Député de Corrèze (2024-présent)", "Maire de Tulle (2001-2008)", "Premier secrétaire du PS (1997-2008)", "Président du Conseil général de Corrèze (2008-2012)"],
     affaires: [],
@@ -101,7 +101,7 @@ export const ELUS = [
   {
     id: 4, nom: "Jean-Luc Mélenchon", parti: "LFI", emoji: "✊", couleur: "#c62828",
     alias: ["Méluche", "Le Tribun", "JLM"],
-    photo_url: "/photos/jean-luc-melenchon.png",
+    photo_url: "/photos/jean-luc-melenchon.webp",
     fonction: "Député des Bouches-du-Rhône",
     mandats: ["Député des Bouches-du-Rhône (2017-2022)", "Député de l'Essonne (2012-2017)", "Ministre délégué à l'Enseignement professionnel (2000-2002)", "Sénateur de l'Essonne (1986-2000)"],
     affaires: [
@@ -283,7 +283,7 @@ export const ELUS = [
   {
     id: 10, nom: "Sandrine Rousseau", parti: "EELV", emoji: "🌿", couleur: "#2e7d32",
     alias: ["L'Écoféministe", "Madame Barbecue"],
-    photo_url: "/photos/sandrine-rousseau.png",
+    photo_url: "/photos/sandrine-rousseau.webp",
     fonction: "Députée de Paris",
     mandats: ["Députée de Paris (2022-présent)", "Vice-présidente de l'université de Lille (2016-2020)"],
     affaires: [],
@@ -313,7 +313,7 @@ export const ELUS = [
   {
     id: 11, nom: "Gérald Darmanin", parti: "Renaissance", emoji: "🛡️", couleur: "#e65100",
     alias: ["Darma", "Le Bulldozer", "Gégé"],
-    photo_url: "/photos/gerald-darmanin.png",
+    photo_url: "/photos/gerald-darmanin.webp",
     fonction: "Ministre de la Justice",
     mandats: ["Ministre de la Justice (2024-présent)", "Ministre de l'Intérieur (2020-2024)", "Maire de Tourcoing (2014-2020)", "Député du Nord (2012-2017)"],
     affaires: [
@@ -343,7 +343,7 @@ export const ELUS = [
   {
     id: 12, nom: "François Bayrou", parti: "MoDem", emoji: "🟠", couleur: "#ef6c00",
     alias: ["Le Béarnais", "Bayrou l'Éternel", "Le Centriste"],
-    photo_url: "/photos/francois-bayrou.png",
+    photo_url: "/photos/francois-bayrou.webp",
     fonction: "Premier Ministre",
     mandats: ["Premier ministre (2024-présent)", "Maire de Pau (2014-présent)", "Ministre de l'Éducation nationale (1993-1997)", "Député des Pyrénées-Atlantiques (1986-2012)", "Député européen (1999-2002)"],
     affaires: [

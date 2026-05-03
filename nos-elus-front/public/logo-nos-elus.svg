@@ -14,7 +14,7 @@
   <circle cx="108" cy="18" r="10" fill="none" stroke="#fdcb6e" stroke-width="2.5"/>
   <line x1="115" y1="25" x2="123" y2="33" stroke="#fdcb6e" stroke-width="3" stroke-linecap="round"/>
   <!-- Texte -->
-  <text x="100" y="58" text-anchor="middle" class="logo-text" font-size="16">nos-elus.fr</text>
+  <text x="100" y="58" text-anchor="middle" class="logo-text" font-size="16">nos-elus.com</text>
   <!-- Ligne décorative -->
   <line x1="55" y1="63" x2="145" y2="63" stroke="#fdcb6e" stroke-width="0.8" opacity="0.4"/>
 </svg>

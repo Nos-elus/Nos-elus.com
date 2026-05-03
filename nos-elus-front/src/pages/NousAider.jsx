@@ -90,16 +90,6 @@ export default function NousAider() {
         </a>
       </div>
 
-      {/* Actions physiques */}
-      <Section title="Actions physiques" icon="🏛️" color={S.purple}>
-        <Task
-          icon="📄" color={S.purple}
-          badge="Impact fort" difficulty="⏱ 1-2h"
-          title="Récupérer une déclaration de patrimoine en préfecture"
-          desc="Les élus locaux non soumis à la HATVP (maires de communes < 20 000 hab., conseillers) déposent leurs déclarations à la préfecture. Ces documents sont consultables sur place sur simple demande. Photographiez et envoyez-nous via le formulaire contact."
-        />
-      </Section>
-
       {/* Signalements et corrections */}
       <Section title="Signaler et corriger" icon="✏️" color={S.gold}>
         <Task

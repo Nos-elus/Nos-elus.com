@@ -78,14 +78,16 @@ if ($category !== '') {
                 'select' => "SELECT e.id, e.nom, e.prenom, e.slug, e.photo_url, e.parti, e.fonction, e.emoji, e.couleur,
                        COUNT(m.id) AS nb_mandats
                 FROM elus e JOIN mandats m ON m.elu_id = e.id
-                WHERE (m.date_debut IS NULL OR m.date_debut = '0000-00-00' OR m.date_debut >= '1900-01-01')
+                WHERE e.actif = 1
+                  AND (m.date_debut IS NULL OR m.date_debut = '0000-00-00' OR m.date_debut >= '1900-01-01')
                   AND (m.titre REGEXP '(député|sénateur|sénatrice|maire|conseill|adjoint|ministre|garde des sceaux|premier ministre|président.*(rép|conseil|sénat|assemblée)|membre.*conseil constitutionnel|secrétaire d)'
                        OR m.titre LIKE 'Député%' OR m.titre LIKE 'Sénateur%' OR m.titre LIKE 'Maire%')
                 GROUP BY e.id
                 ORDER BY nb_mandats DESC",
                 'count' => "SELECT COUNT(DISTINCT e.id)
                 FROM elus e JOIN mandats m ON m.elu_id = e.id
-                WHERE (m.date_debut IS NULL OR m.date_debut = '0000-00-00' OR m.date_debut >= '1900-01-01')
+                WHERE e.actif = 1
+                  AND (m.date_debut IS NULL OR m.date_debut = '0000-00-00' OR m.date_debut >= '1900-01-01')
                   AND (m.titre REGEXP '(député|sénateur|sénatrice|maire|conseill|adjoint|ministre|garde des sceaux|premier ministre|président.*(rép|conseil|sénat|assemblée)|membre.*conseil constitutionnel|secrétaire d)'
                        OR m.titre LIKE 'Député%' OR m.titre LIKE 'Sénateur%' OR m.titre LIKE 'Maire%')",
             ],
@@ -314,10 +316,11 @@ if ($category !== '') {
             $stmtSal = $pdo->query("
                 SELECT e.id, e.nom, e.prenom, e.slug, e.photo_url, e.parti, e.fonction, e.emoji, e.couleur, e.salaire_brut,
                        (SELECT JSON_ARRAYAGG(JSON_OBJECT('titre', m.titre, 'date_debut', m.date_debut, 'date_fin', m.date_fin))
-                        FROM mandats m WHERE m.elu_id = e.id AND m.date_fin IS NULL
+                        FROM mandats m WHERE m.elu_id = e.id AND m.date_fin IS NULL AND m.date_debut >= '2017-01-01'
                        ) AS mandats_json
                 FROM elus e
-                WHERE EXISTS (SELECT 1 FROM mandats m WHERE m.elu_id = e.id AND m.date_fin IS NULL)
+                WHERE e.actif = 1
+                  AND EXISTS (SELECT 1 FROM mandats m WHERE m.elu_id = e.id AND m.date_fin IS NULL AND m.date_debut >= '2017-01-01')
                 ORDER BY e.id
             ");
 
@@ -520,12 +523,13 @@ $data = cachedResponse('palmares', [], CACHE_TTL_LONG, function() use ($pdo) {
     ");
     $palmares['top_carriere'] = $stmt2->fetchAll();
 
-    // 3. Plus grand nombre de mandats (vrais mandats rémunérés uniquement)
+    // 3. Plus grand nombre de mandats (vrais mandats rémunérés uniquement, actifs)
     $stmt3 = $pdo->query("
         SELECT e.id, e.nom, e.prenom, e.slug, e.photo_url, e.parti, e.fonction, e.emoji, e.couleur,
                COUNT(m.id) AS nb_mandats
         FROM elus e JOIN mandats m ON m.elu_id = e.id
-        WHERE (m.date_debut IS NULL OR m.date_debut = '0000-00-00' OR m.date_debut >= '1900-01-01')
+        WHERE e.actif = 1
+          AND (m.date_debut IS NULL OR m.date_debut = '0000-00-00' OR m.date_debut >= '1900-01-01')
           AND (m.titre REGEXP '(député|sénateur|sénatrice|maire|conseill|adjoint|ministre|garde des sceaux|premier ministre|président.*(rép|conseil|sénat|assemblée)|membre.*conseil constitutionnel|secrétaire d)'
                OR m.titre LIKE 'Député%' OR m.titre LIKE 'Sénateur%' OR m.titre LIKE 'Maire%')
         GROUP BY e.id
@@ -617,13 +621,14 @@ $data = cachedResponse('palmares', [], CACHE_TTL_LONG, function() use ($pdo) {
     ");
     $palmares['top_jeunes'] = $stmt7->fetchAll();
 
-    // 8. Les doyens (plus vieux en exercice)
+    // 8. Les doyens (plus vieux en exercice — actif=1 obligatoire)
     $stmt8 = $pdo->query("
         SELECT e.id, e.nom, e.prenom, e.slug, e.photo_url, e.parti, e.fonction, e.emoji, e.couleur,
                e.date_naissance,
                TIMESTAMPDIFF(YEAR, e.date_naissance, CURDATE()) AS age
         FROM elus e
-        WHERE e.date_naissance IS NOT NULL AND e.date_naissance > '1900-01-01' AND e.date_naissance < '1960-01-01'
+        WHERE e.actif = 1
+        AND e.date_naissance IS NOT NULL AND e.date_naissance > '1900-01-01' AND e.date_naissance < '1960-01-01'
         AND EXISTS (SELECT 1 FROM mandats m WHERE m.elu_id = e.id AND (m.date_fin IS NULL OR m.date_fin >= '2024-01-01'))
         ORDER BY e.date_naissance ASC
         LIMIT 10

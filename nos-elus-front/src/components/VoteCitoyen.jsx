@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { S } from "../utils/constants";
+import { getVoterUid } from "../utils/voterUid";
 
 const API = import.meta.env.VITE_API_URL || "/api";
 const LS_KEY = "noselus_votes";
@@ -26,7 +27,7 @@ const VoteCitoyen = ({ eluId }) => {
     const local = getLocalVotes();
     if (local[eluId] !== undefined) setUserVote(local[eluId]);
 
-    fetch(`${API}/vote.php?elu_id=${eluId}`, { credentials: "same-origin" })
+    fetch(`${API}/vote.php?elu_id=${eluId}&uid=${encodeURIComponent(getVoterUid())}`, { credentials: "same-origin" })
       .then(r => {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
@@ -80,7 +81,7 @@ const VoteCitoyen = ({ eluId }) => {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ elu_id: eluId, vote }),
+        body: JSON.stringify({ elu_id: eluId, vote, uid: getVoterUid() }),
       });
       const d = await r.json();
       // Synchroniser avec la réponse serveur (source de vérité)

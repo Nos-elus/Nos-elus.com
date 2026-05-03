@@ -6,7 +6,17 @@ export default defineConfig({
   build: { outDir: 'dist' },
   server: {
     proxy: {
-      '/api': 'http://localhost:8080'
+      // Cible API : prod par défaut. Pour API locale : VITE_API_TARGET=http://localhost:8080 npm run dev
+      '/api': {
+        target: process.env.VITE_API_TARGET || 'https://nos-elus.com',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/photos': {
+        target: process.env.VITE_API_TARGET || 'https://nos-elus.com',
+        changeOrigin: true,
+        secure: true,
+      }
     }
   }
 })

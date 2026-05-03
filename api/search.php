@@ -11,6 +11,10 @@ if (mb_strlen($q) < 2) {
 
 // Normaliser la casse pour clé de cache cohérente
 $q = mb_strtolower(trim($q));
+// Échapper les opérateurs MySQL FULLTEXT BOOLEAN MODE (sinon erreur SQL)
+$q = preg_replace('/[+\-><()~*"@]/', ' ', $q);
+$q = trim(preg_replace('/\s+/', ' ', $q));
+if ($q === '') { jsonResponse([]); }
 
 // Cache : résultats de recherche (TTL court)
 $data = cachedResponse('search', ['q' => $q], CACHE_TTL_SEARCH, function() use ($pdo, $q) {

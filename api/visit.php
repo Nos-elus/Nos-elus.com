@@ -1,8 +1,8 @@
 <?php
 /**
- * Compteur de visiteurs uniques (par IP hashée, pas de données personnelles).
+ * Compteur de visiteurs uniques.
  * GET  → {"total": 1234}
- * POST → enregistre la visite si nouvelle IP, retourne le total
+ * POST → enregistre la visite, retourne le total.
  */
 require_once __DIR__ . '/config.php';
 setApiHeaders();
@@ -10,9 +10,23 @@ setApiHeaders();
 header('Cache-Control: no-store');
 
 $VISITS_FILE = __DIR__ . '/cache/data/visits.json';
+$salt = $VISIT_SALT ?? getenv('NOSELUS_VISIT_SALT') ?? '';
 
-$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-$hash = hash('sha256', $ip . ($VISIT_SALT ?? getenv('NOSELUS_VISIT_SALT') ?? ''));
+$identifier = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $body = file_get_contents('php://input');
+    if ($body) {
+        $json = json_decode($body, true);
+        $u = $json['uid'] ?? null;
+        if (is_string($u) && strlen($u) >= 8 && strlen($u) <= 64 && preg_match('/^[A-Za-z0-9_\-]+$/', $u)) {
+            $identifier = 'uid:' . $u;
+        }
+    }
+}
+if (!$identifier) {
+    $identifier = 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+}
+$hash = hash('sha256', $identifier . $salt);
 
 // Lecture atomique avec flock
 $fp = fopen($VISITS_FILE, 'c+');

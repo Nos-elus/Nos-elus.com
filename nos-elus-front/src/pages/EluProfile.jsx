@@ -461,29 +461,35 @@ const EluProfile = () => {
     { id: "patrimoine", label: "Coffre-fort", icon: <IconCoffre size={16} color={S.gold} /> },
   ];
 
+  const isOgMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("og") === "1";
+
   return (
     <div style={{ animation: "slideUp 0.5s cubic-bezier(0.16,1,0.3,1)", maxWidth: 960, margin: "0 auto", paddingTop: 32 }}>
-      <button onClick={() => navigate(-1)} style={{
-        background: S.card, border: `1px solid ${S.border}`, borderRadius: 99,
-        cursor: "pointer", fontFamily: S.font, fontSize: 13, fontWeight: 700,
-        color: S.textMuted, marginBottom: 24, padding: "8px 18px", transition: "all 0.2s",
-      }}
-      onMouseEnter={e => { e.target.style.color = "#fff"; }} onMouseLeave={e => { e.target.style.color = S.textMuted; }}
-      >← Retour</button>
+      {!isOgMode && (
+        <button onClick={() => navigate(-1)} style={{
+          background: S.card, border: `1px solid ${S.border}`, borderRadius: 99,
+          cursor: "pointer", fontFamily: S.font, fontSize: 13, fontWeight: 700,
+          color: S.textMuted, marginBottom: 24, padding: "8px 18px", transition: "all 0.2s",
+        }}
+        onMouseEnter={e => { e.target.style.color = "#fff"; }} onMouseLeave={e => { e.target.style.color = S.textMuted; }}
+        >← Retour</button>
+      )}
 
       {/* Jackpot mini — en haut */}
-      <SlotMachine elu={elu} mini />
+      {!isOgMode && <SlotMachine elu={elu} mini />}
 
       {/* Header + Vote citoyen + Boussole */}
       <div className="elu-header" style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "stretch", flexWrap: "wrap" }}>
 
         {/* Vote citoyen — gauche */}
-        <div style={{
-          width: 160, minWidth: 145, flexShrink: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <VoteCitoyen eluId={elu.id} />
-        </div>
+        {!isOgMode && (
+          <div style={{
+            width: 160, minWidth: 145, flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <VoteCitoyen eluId={elu.id} />
+          </div>
+        )}
 
         {/* Header centre */}
         <div style={{
@@ -780,21 +786,24 @@ const EluProfile = () => {
             );
           })()}
 
-          <div style={{ marginTop: 12 }}><ShareButtons elu={elu} /></div>
+          {!isOgMode && <div style={{ marginTop: 12 }}><ShareButtons elu={elu} /></div>}
         </div>
 
         {/* Boussole — droite */}
-        <div className="elu-boussole" style={{
-          width: 280, minWidth: 250, flexShrink: 0,
-          background: `linear-gradient(135deg, ${S.card} 0%, #16213e 100%)`,
-          borderRadius: 16, border: `1px solid ${S.border}`,
-          padding: "10px 12px 14px",
-        }}>
-          <BoussolePolique elu={elu} />
-        </div>
+        {!isOgMode && (
+          <div className="elu-boussole" style={{
+            width: 280, minWidth: 250, flexShrink: 0,
+            background: `linear-gradient(135deg, ${S.card} 0%, #16213e 100%)`,
+            borderRadius: 16, border: `1px solid ${S.border}`,
+            padding: "10px 12px 14px",
+          }}>
+            <BoussolePolique elu={elu} />
+          </div>
+        )}
       </div>
 
-
+      {isOgMode ? null : (
+      <>
       {/* Palmarès — horizontal */}
       <PalmaresMandat elu={elu} />
 
@@ -876,46 +885,66 @@ const EluProfile = () => {
                 </div>
 
                 {/* Panneau méthodologie */}
-                {showMethodo && (
-                  <div style={{
-                    background: "rgba(253,203,110,0.06)", border: `1px solid ${S.gold}33`,
-                    borderRadius: 12, padding: "14px 16px", marginBottom: 14,
-                    fontFamily: S.font, fontSize: 12, color: S.textMuted, lineHeight: 1.6,
-                  }}>
-                    <div style={{ fontFamily: S.fontTitle, fontSize: 14, color: S.gold, marginBottom: 10 }}>Comment est calculée l'activité ?</div>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                      <thead>
-                        <tr style={{ borderBottom: `1px solid ${S.border}` }}>
-                          <th style={{ textAlign: "left", padding: "6px 8px", color: S.textMain, fontSize: 12 }}>Source</th>
-                          <th style={{ textAlign: "center", padding: "6px 8px", color: S.textMain, fontSize: 12 }}>Poids</th>
-                          <th style={{ textAlign: "left", padding: "6px 8px", color: S.textMain, fontSize: 12 }}>Détail</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style={{ borderBottom: `1px solid ${S.border}22` }}>
-                          <td style={{ padding: "6px 8px" }}>🗳️ Votes en séance</td>
-                          <td style={{ textAlign: "center", padding: "6px 8px", color: S.gold, fontWeight: 800 }}>50%</td>
-                          <td style={{ padding: "6px 8px", fontSize: 11 }}>Scrutins nominatifs avec 200+ votants (source : data.assemblee-nationale.fr / HowTheyVote.eu)</td>
-                        </tr>
-                        <tr style={{ borderBottom: `1px solid ${S.border}22` }}>
-                          <td style={{ padding: "6px 8px" }}>🏛️ Présence en commission</td>
-                          <td style={{ textAlign: "center", padding: "6px 8px", color: S.gold, fontWeight: 800 }}>35%</td>
-                          <td style={{ padding: "6px 8px", fontSize: 11 }}>Réunions de commission avec statut présent/absent/excusé (source : Agenda AN)</td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: "6px 8px" }}>📝 Questions écrites</td>
-                          <td style={{ textAlign: "center", padding: "6px 8px", color: S.gold, fontWeight: 800 }}>15%</td>
-                          <td style={{ padding: "6px 8px", fontSize: 11 }}>Questions posées au gouvernement (source : AN / Sénat open data)</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <div style={{ marginTop: 10, fontSize: 11, color: S.textDim, fontStyle: "italic" }}>
-                      Le taux global = (votes × 50%) + (commissions × 35%) + (questions normalisées × 15%).
-                      Les élus avec un poste spécial (président d'assemblée, ministre, outre-mer) sont signalés car leur situation impacte mécaniquement leur présence.
-                      Toutes les données sont publiques et vérifiables aux sources indiquées.
+                {showMethodo && (() => {
+                  const aCommissions = (act?.nb_réunions_convoque || 0) > 0;
+                  const aQuestions = (act?.nb_questions || 0) > 0;
+                  const tagOK = { color: S.green, fontWeight: 800 };
+                  const tagPending = { color: S.textDim, fontStyle: "italic" };
+                  return (
+                    <div style={{
+                      background: "rgba(253,203,110,0.06)", border: `1px solid ${S.gold}33`,
+                      borderRadius: 12, padding: "14px 16px", marginBottom: 14,
+                      fontFamily: S.font, fontSize: 12, color: S.textMuted, lineHeight: 1.6,
+                    }}>
+                      <div style={{ fontFamily: S.fontTitle, fontSize: 14, color: S.gold, marginBottom: 10 }}>Comment est calculée l'activité ?</div>
+                      <div style={{ marginBottom: 10 }}>
+                        Le taux global est un <strong>ratio direct</strong> : nombre d'événements de présence sur nombre d'événements applicables, multiplié par 100. Aucune pondération arbitraire.
+                      </div>
+                      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <thead>
+                          <tr style={{ borderBottom: `1px solid ${S.border}` }}>
+                            <th style={{ textAlign: "left", padding: "6px 8px", color: S.textMain, fontSize: 12 }}>Dimension</th>
+                            <th style={{ textAlign: "center", padding: "6px 8px", color: S.textMain, fontSize: 12 }}>État</th>
+                            <th style={{ textAlign: "left", padding: "6px 8px", color: S.textMain, fontSize: 12 }}>Détail</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr style={{ borderBottom: `1px solid ${S.border}22` }}>
+                            <td style={{ padding: "6px 8px" }}>🗳️ Votes en séance</td>
+                            <td style={{ textAlign: "center", padding: "6px 8px", ...tagOK }}>✓ Calculé</td>
+                            <td style={{ padding: "6px 8px", fontSize: 11 }}>
+                              {act?.nb_votes ?? 0} votes sur {act?.total_scrutins ?? 0} scrutins applicables. Périmètre = scrutins de la chambre durant les périodes de mandat, moins les fonctions ministérielles concomitantes.
+                            </td>
+                          </tr>
+                          <tr style={{ borderBottom: `1px solid ${S.border}22` }}>
+                            <td style={{ padding: "6px 8px" }}>🏛️ Présence en commission</td>
+                            <td style={{ textAlign: "center", padding: "6px 8px", ...(aCommissions ? tagOK : tagPending) }}>{aCommissions ? "✓ Calculé" : "À intégrer"}</td>
+                            <td style={{ padding: "6px 8px", fontSize: 11 }}>
+                              {aCommissions
+                                ? `${act.nb_réunions_present} sur ${act.nb_réunions_convoque} réunions de commission.`
+                                : "Champs prévus en BDD, source non encore intégrée."}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: "6px 8px" }}>📝 Questions écrites/orales</td>
+                            <td style={{ textAlign: "center", padding: "6px 8px", ...(aQuestions ? tagOK : tagPending) }}>{aQuestions ? "✓ Calculé" : "À intégrer"}</td>
+                            <td style={{ padding: "6px 8px", fontSize: 11 }}>
+                              {aQuestions
+                                ? `${act.nb_questions} questions posées.`
+                                : "Champs prévus en BDD, source non encore intégrée."}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div style={{ marginTop: 10, fontSize: 11, color: S.textDim }}>
+                        <strong>Sources :</strong> Assemblée nationale (data.assemblee-nationale.fr), Parlement européen (europarl.europa.eu).
+                      </div>
+                      <div style={{ marginTop: 6, fontSize: 11, color: S.textDim, fontStyle: "italic" }}>
+                        Limites actuelles : sénateurs non couverts (pas de scrutins en BDD). Absences justifiées (commission d'enquête, mission, maladie) actuellement comptées comme absences faute d'import du statut "Non-votant".
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 12 }}>
                   {[
                     { label: "Pour", value: pour.length, color: S.green, pct: Math.round(pour.length / total * 100) },
@@ -959,7 +988,7 @@ const EluProfile = () => {
                     }}>{tauxAssiduite}%</span>
                   </div>
                   <div style={{ fontFamily: S.font, fontSize: 10, color: S.textDim, marginTop: 4 }}>
-                    {total} votes sur {totalScrutins} scrutins (seuil 200+ votants)
+                    {total} votes sur {totalScrutins} scrutins applicables
                   </div>
                 </div>
 
@@ -1001,15 +1030,20 @@ const EluProfile = () => {
                         <div style={{ fontFamily: S.font, fontSize: 10, color: S.textDim }}>posées au gouvernement</div>
                       </div>
                     )}
-                    {act.taux_global > 0 && (
-                      <div style={{ textAlign: "center" }}>
-                        <div style={{ fontFamily: S.font, fontSize: 11, color: S.textDim }}>Activité globale</div>
-                        <div style={{ fontFamily: S.fontTitle, fontSize: 16, color: act.taux_global >= 60 ? S.green : act.taux_global >= 35 ? S.gold : S.red }}>
-                          {Math.round(act.taux_global)}%
+                    {act.taux_global > 0 && (() => {
+                      const dims = ["votes"];
+                      if ((act.nb_réunions_convoque || 0) > 0) dims.push("commissions");
+                      if ((act.nb_questions || 0) > 0) dims.push("questions");
+                      return (
+                        <div style={{ textAlign: "center" }}>
+                          <div style={{ fontFamily: S.font, fontSize: 11, color: S.textDim }}>Activité globale</div>
+                          <div style={{ fontFamily: S.fontTitle, fontSize: 16, color: act.taux_global >= 60 ? S.green : act.taux_global >= 35 ? S.gold : S.red }}>
+                            {Math.round(act.taux_global)}%
+                          </div>
+                          <div style={{ fontFamily: S.font, fontSize: 10, color: S.textDim }}>{dims.join(" + ")}</div>
                         </div>
-                        <div style={{ fontFamily: S.font, fontSize: 10, color: S.textDim }}>votes + commissions + questions</div>
-                      </div>
-                    )}
+                      );
+                    })()}
                     {act.rang > 0 && (
                       <div style={{ textAlign: "center" }}>
                         <div style={{ fontFamily: S.font, fontSize: 11, color: S.textDim }}>Classement {act.type_mandat || "Député"}</div>
@@ -1580,6 +1614,17 @@ const EluProfile = () => {
                         ⏳ {pw.note_tardivite}
                       </div>
                     )}
+                    {pw.note_absurdite && (
+                      <div style={{
+                        marginTop: 10, padding: "8px 12px",
+                        background: "rgba(255,71,87,0.06)", borderRadius: 8,
+                        borderLeft: "3px solid #ff4757",
+                      }}>
+                        <div style={{ fontFamily: S.font, fontSize: 11, color: "#ff7888", lineHeight: 1.55, fontStyle: "italic" }}>
+                          ⚖️ <strong style={{ color: "#ff4757" }}>Aberration juridique :</strong> {pw.note_absurdite}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1620,6 +1665,8 @@ const EluProfile = () => {
 
       {showPartiModal && elu.parti && (
         <PartiMembers parti={elu.parti} currentEluId={elu.id} onClose={() => setShowPartiModal(false)} />
+      )}
+      </>
       )}
     </div>
   );

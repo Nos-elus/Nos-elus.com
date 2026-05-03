@@ -52,7 +52,11 @@ class DataFetcher {
             ORDER BY relevance DESC, nb_consultations DESC
             LIMIT :lim
         ');
-        $boolQuery = implode(' ', array_map(fn($w) => '+' . $w . '*', explode(' ', trim($query))));
+        // Échapper les opérateurs FULLTEXT BOOLEAN MODE dans la query brute
+        $cleanQuery = preg_replace('/[+\-><()~*"@]/', ' ', $query);
+        $cleanQuery = trim(preg_replace('/\s+/', ' ', $cleanQuery));
+        if ($cleanQuery === '') return [];
+        $boolQuery = implode(' ', array_map(fn($w) => '+' . $w . '*', explode(' ', $cleanQuery)));
         $stmt->bindValue(':q', $boolQuery);
         $stmt->bindValue(':q2', $boolQuery);
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);

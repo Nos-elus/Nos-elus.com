@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { S } from "../utils/constants";
 import { useApi } from "../hooks/useApi";
 import Avatar from "./Avatar";
+import { withCacheBust } from "../utils/cacheBust";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -92,7 +93,7 @@ const PokeCard = ({ elu, rank, onClick }) => {
           background: `linear-gradient(135deg, ${elu.couleur || S.purple}44, ${S.card})`,
         }}>
           {elu.photo_url ? (
-            <img src={elu.photo_url} alt={elu.nom} loading="lazy"
+            <img src={withCacheBust(elu.photo_url, elu.updated_at)} alt={elu.nom} loading="lazy"
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               onError={(e) => { e.target.style.display = "none"; }}
             />

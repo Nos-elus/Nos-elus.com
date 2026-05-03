@@ -102,26 +102,30 @@ function PageLoader() {
 }
 
 export default function App() {
+  // Mode "OG card" : ?og=1 cache header/navbar/footer pour les screenshots sociaux
+  const isOgMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("og") === "1";
   return (
     <BrowserRouter>
       <ScrollToTop />
       <div style={{ minHeight: "100vh", background: `linear-gradient(160deg, ${S.bg} 0%, #0d1525 40%, #141b2d 70%, #0a0e1a 100%)`, fontFamily: S.font, color: S.textMain }}>
-        <div style={{
-          background: `linear-gradient(90deg, ${S.gold}22, ${S.gold}11)`,
-          borderBottom: `1px solid ${S.gold}33`,
-          color: S.gold,
-          fontFamily: S.font,
-          fontSize: 12,
-          fontWeight: 700,
-          textAlign: "center",
-          padding: "6px 12px",
-          letterSpacing: 0.4,
-          position: "relative",
-          zIndex: 50,
-        }}>
-          🚧 Version BETA — Site en cours de développement
-        </div>
-        <Navbar />
+        {!isOgMode && (
+          <div style={{
+            background: `linear-gradient(90deg, ${S.gold}22, ${S.gold}11)`,
+            borderBottom: `1px solid ${S.gold}33`,
+            color: S.gold,
+            fontFamily: S.font,
+            fontSize: 12,
+            fontWeight: 700,
+            textAlign: "center",
+            padding: "6px 12px",
+            letterSpacing: 0.4,
+            position: "relative",
+            zIndex: 50,
+          }}>
+            🚧 Version BETA — Site en cours de développement
+          </div>
+        )}
+        {!isOgMode && <Navbar />}
 
         <main style={{ padding: "0 24px", maxWidth: 1080, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <Suspense fallback={<PageLoader />}>
@@ -146,8 +150,8 @@ export default function App() {
           </Suspense>
         </main>
 
-        <Footer />
-        <BackToTop />
+        {!isOgMode && <Footer />}
+        {!isOgMode && <BackToTop />}
       </div>
     </BrowserRouter>
   );
