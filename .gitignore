@@ -22,8 +22,6 @@ api/cache/
 api/candidats_2027.json
 
 # Documents et notes internes — confidentialité du contributeur
-claude.md
-.claude/
 nos-elus-plan-projet.docx
 echange/
 deploy/
@@ -85,4 +83,11 @@ Document 1 non enregistré
 scripts/check-no-leak.sh
 scripts/check-*.sh
 scripts/local-*
+
+# Scripts internes audit/fix BDD — JAMAIS publiés (touchent BDD avec credentials, peuvent leak données privées)
+scripts/audit-*.php
+scripts/fix-*.php
+scripts/generate-fix-*.php
+scripts/create-senateurs-*.php
+scripts/rne-diff-*.php
 
