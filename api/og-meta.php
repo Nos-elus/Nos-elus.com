@@ -22,6 +22,14 @@ $stmt->execute([':s' => $slug]);
 $elu = $stmt->fetch();
 
 if (!$elu) {
+    // Vérifier si slug renommé : 301 vers nouveau slug pour préserver les liens partagés
+    $rd = $pdo->prepare("SELECT new_slug FROM slug_history WHERE old_slug = :s LIMIT 1");
+    $rd->execute([':s' => $slug]);
+    $newSlug = $rd->fetchColumn();
+    if ($newSlug) {
+        header("Location: /elu/" . urlencode($newSlug), true, 301);
+        exit;
+    }
     readfile($indexFile);
     exit;
 }

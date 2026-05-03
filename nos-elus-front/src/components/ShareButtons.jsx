@@ -8,7 +8,10 @@ const ShareButtons = ({ elu }) => {
   const slug = elu.slug || slugify(elu.nom);
   const rawUrl = `https://nos-elus.com/elu/${slug}`;
   const url = encodeURIComponent(rawUrl);
-  const text = encodeURIComponent(`Decouvrez la fiche de ${elu.nom} sur nos-elus.com`);
+  // Pas de "nos-elus.com" dans le texte : sinon X interprète comme URL séparée et
+  // génère la carte de la home au lieu de celle de l'élu (param &url= ignoré).
+  const fullName = `${elu.prenom || ""} ${elu.nom || ""}`.trim() || elu.nom || "";
+  const text = encodeURIComponent(`Découvrez la fiche de ${fullName}`);
   const ogImageUrl = `/api/og-image.php?slug=${slug}`;
 
   const [copied, setCopied] = useState(false);
@@ -21,8 +24,8 @@ const ShareButtons = ({ elu }) => {
       const file = new File([blob], `nos-elus-${slug}.png`, { type: "image/png" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: `${elu.nom} — nos-elus.com`,
-          text: `Decouvrez la fiche de ${elu.nom}`,
+          title: `Fiche de ${fullName}`,
+          text: `Découvrez la fiche de ${fullName}`,
           url: rawUrl,
           files: [file],
         });
